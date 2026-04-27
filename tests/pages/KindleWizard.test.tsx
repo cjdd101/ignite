@@ -85,7 +85,7 @@ describe('KindleWizard', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText('选择探索视角')).toBeDefined()
+      expect(screen.getByText('选择探索视角（可多选）')).toBeDefined()
     })
   })
 
@@ -128,8 +128,11 @@ describe('KindleWizard', () => {
     })
 
     await waitFor(() => {
-      const checkboxes = screen.getAllByRole('checkbox')
-      fireEvent.click(checkboxes[0])
+      const perspectiveButtons = screen.getAllByRole('button').filter(btn =>
+        btn.textContent?.includes('阅读') || btn.textContent?.includes('观看')
+      )
+      expect(perspectiveButtons.length).toBeGreaterThan(0)
+      fireEvent.click(perspectiveButtons[0])
     })
 
     await waitFor(() => {
@@ -137,7 +140,7 @@ describe('KindleWizard', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText(/第2步/)).toBeDefined()
+      expect(screen.getByText('第2步: 确认行动')).toBeDefined()
     })
   })
 })
