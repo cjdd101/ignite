@@ -10,6 +10,7 @@ interface RekindlePageProps {
 }
 
 const REKINDLE_COOLDOWN = 5000 // 5 seconds
+const REKINDLE_LIMIT = 10 // Max 10 rekindles per flame
 
 export function RekindlePage({ flameId }: RekindlePageProps) {
   const navigate = useNavigate()
@@ -19,6 +20,7 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
   const [reflection, setReflection] = useState('')
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [atLimit, setAtLimit] = useState(false)
 
   useEffect(() => {
     loadFlame()
@@ -37,6 +39,10 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
     const f = await db.flames.get(flameId)
     if (f) {
       setFlame(f)
+      // Check if at rekindle limit
+      if (f.rekindleCount >= REKINDLE_LIMIT) {
+        setAtLimit(true)
+      }
       // Check if in cooldown
       if (f.lastRekindleTime) {
         const elapsed = Date.now() - f.lastRekindleTime
@@ -108,7 +114,16 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
         {cooldownRemaining > 0 && (
           <div className="mb-4 p-3 bg-orange-900/30 border border-orange-500 rounded-lg">
             <p className="text-orange-400 text-center">
-              重新取火 ({cooldownRemaining}s)
+              重新取火 (5s)
+            </p>
+          </div>
+        )}
+
+        {/* At Limit Warning */}
+        {atLimit && (
+          <div className="mb-4 p-3 bg-red-900/30 border border-red-500 rounded-lg">
+            <p className="text-red-400 text-center">
+              此烈焰已达取火上限 ({REKINDLE_LIMIT}次)，无法继续取火
             </p>
           </div>
         )}
@@ -123,7 +138,7 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
                 onChange={(e) => setReflection(e.target.value)}
                 placeholder="这次探索给你带来了什么..."
                 rows={6}
-                disabled={cooldownRemaining > 0}
+                disabled={cooldownRemaining > 0 || atLimit}
                 className="w-full bg-bg-card border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:border-fire-flame focus:outline-none resize-none disabled:opacity-50"
               />
             </div>
@@ -138,9 +153,9 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={!reflection.trim() || cooldownRemaining > 0 || isSubmitting}
+              disabled={!reflection.trim() || cooldownRemaining > 0 || atLimit || isSubmitting}
               className={`flex-1 py-2 rounded ${
-                reflection.trim() && cooldownRemaining === 0 && !isSubmitting
+                reflection.trim() && cooldownRemaining === 0 && !atLimit && !isSubmitting
                   ? 'bg-fire-flame text-white'
                   : 'bg-gray-700 text-gray-500 cursor-not-allowed'
               }`}
