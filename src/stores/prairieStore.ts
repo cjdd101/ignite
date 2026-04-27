@@ -77,6 +77,7 @@ export const usePrairieStore = create<PrairieState>((set, get) => ({
       await db.prairies.put(rest as Prairie)
     }
     await get().fetchPrairies()
+    await get().fetchArchivedPrairies()
   },
 
   permanentlyDeletePrairie: async (id) => {
