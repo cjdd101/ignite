@@ -1,169 +1,187 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { db } from '@/lib/db'
 import { useFlameStore } from '@/stores/flameStore'
 import { useSparkStore } from '@/stores/sparkStore'
-import type { Flame } from '@/types'
+import { api } from '@/lib/api'
+import { RekindleSparkCard } from '@/components/RekindleSparkCard'
 
-interface RekindlePageProps {
-  flameId: string
+type Step = 'reflect' | 'review'
+
+interface RekindledSpark {
+  content: string
+  type: string
+  retained: boolean
+  discarded: boolean
 }
 
-const REKINDLE_COOLDOWN = 5000 // 5 seconds
-const REKINDLE_LIMIT = 10 // Max 10 rekindles per flame
+const REKINDLE_COOLDOWN = 5000
+const REKINDLE_LIMIT = 10
 
-export function RekindlePage({ flameId }: RekindlePageProps) {
+export function RekindlePage() {
   const navigate = useNavigate()
-  const { updateFlame, fetchWildFlames } = useFlameStore()
+  const { flames } = useFlameStore()
   const { addSpark } = useSparkStore()
-  const [flame, setFlame] = useState<Flame | null>(null)
+
+  const [step, setStep] = useState<Step>('reflect')
   const [reflection, setReflection] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [sparks, setSparks] = useState<RekindledSpark[]>([])
   const [atLimit, setAtLimit] = useState(false)
 
   useEffect(() => {
-    loadFlame()
-  }, [flameId])
+    if (flames.length >= REKINDLE_LIMIT) {
+      setAtLimit(true)
+      setCooldownRemaining(5)
+    }
+  }, [flames.length])
 
   useEffect(() => {
     if (cooldownRemaining > 0) {
       const timer = setTimeout(() => {
-        setCooldownRemaining(Math.max(0, cooldownRemaining - 1000))
+        setCooldownRemaining(Math.max(0, cooldownRemaining - 1))
       }, 1000)
       return () => clearTimeout(timer)
     }
   }, [cooldownRemaining])
 
-  const loadFlame = async () => {
-    const f = await db.flames.get(flameId)
-    if (f) {
-      setFlame(f)
-      // Check if at rekindle limit
-      if (f.rekindleCount >= REKINDLE_LIMIT) {
-        setAtLimit(true)
-      }
-      // Check if in cooldown
-      if (f.lastRekindleTime) {
-        const elapsed = Date.now() - f.lastRekindleTime
-        if (elapsed < REKINDLE_COOLDOWN) {
-          setCooldownRemaining(Math.ceil((REKINDLE_COOLDOWN - elapsed) / 1000))
-        }
-      }
+  const handleRekindle = async () => {
+    if (!reflection.trim() || loading || atLimit) return
+
+    if (cooldownRemaining > 0) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await api.rekindle({ reflection: reflection.trim() })
+      setSparks(response.sparks.map((s: { content: string; type: string }) => ({
+        ...s,
+        retained: false,
+        discarded: false,
+      })))
+      setStep('review')
+    } catch (err) {
+      setError('重新点燃失败')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleSubmit = async () => {
-    if (!flame || !reflection.trim() || isSubmitting) return
+  const handleRetain = (index: number) => {
+    setSparks(prev => prev.map((s, i) =>
+      i === index ? { ...s, retained: true, discarded: false } : s
+    ))
+  }
 
-    setIsSubmitting(true)
+  const handleDiscard = (index: number) => {
+    setSparks(prev => prev.map((s, i) =>
+      i === index ? { ...s, retained: false, discarded: true } : s
+    ))
+  }
 
-    // Update flame with user record
-    await updateFlame(flame.id, {
-      userRecord: reflection.trim(),
-      completedAt: Date.now(),
-      lastRekindleTime: Date.now(),
-      rekindleCount: flame.rekindleCount + 1,
-    })
+  const handleBack = () => {
+    setStep('reflect')
+    setSparks([])
+  }
 
-    // Generate new sparks based on reflection
-    await addSpark({
-      content: `回顾「${flame.title}」：${reflection.trim()}`,
-      sourceType: 'rekindle',
-      sourceFlameId: flame.id,
-      sourcePrairieId: flame.prairieId,
-      sourceSparkId: null,
-    })
+  const handleSave = async () => {
+    const sparksToSave = sparks.filter(s => !s.discarded)
 
-    setIsSubmitting(false)
-    await fetchWildFlames()
+    for (const spark of sparksToSave) {
+      await addSpark(spark.content, 'ai_rekindle')
+    }
+
     navigate('/hearth')
   }
 
-  const handleCancel = () => {
-    navigate(-1)
-  }
-
-  if (!flame) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">烈焰不存在</p>
-      </div>
-    )
-  }
+  const canRekindle = reflection.trim().length > 0 && cooldownRemaining === 0 && !loading && !atLimit
 
   return (
     <div className="min-h-screen pb-20">
       <header className="p-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-fire-flame">取火</h1>
+        <h1 className="text-2xl font-bold text-fire-flame">重新点燃</h1>
+        <p className="text-sm text-gray-400">
+          {step === 'reflect' ? '第1步: 写下反思' : '第2步: 选择火种'}
+        </p>
       </header>
 
       <main className="p-4">
-        {/* Flame Info */}
-        <section className="mb-6">
-          <h2 className="text-sm text-gray-400 mb-2">即将完成的探索</h2>
-          <div className="bg-bg-card rounded-lg p-4">
-            <h3 className="font-medium text-fire-flame">{flame.title}</h3>
-            {flame.description && (
-              <p className="text-sm text-gray-400 mt-1">{flame.description}</p>
-            )}
-          </div>
-        </section>
-
-        {/* Cooldown Warning */}
-        {cooldownRemaining > 0 && (
-          <div className="mb-4 p-3 bg-orange-900/30 border border-orange-500 rounded-lg">
-            <p className="text-orange-400 text-center">
-              重新取火 (5s)
-            </p>
-          </div>
-        )}
-
-        {/* At Limit Warning */}
-        {atLimit && (
-          <div className="mb-4 p-3 bg-red-900/30 border border-red-500 rounded-lg">
-            <p className="text-red-400 text-center">
-              此烈焰已达取火上限 ({REKINDLE_LIMIT}次)，无法继续取火
-            </p>
-          </div>
-        )}
-
-        {/* Reflection Form */}
-        <section>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">这次探索给你带来了什么？</label>
+        {step === 'reflect' && (
+          <section>
+            <div className="mb-4">
+              <label className="block text-sm text-gray-400 mb-1">写下你的反思</label>
               <textarea
                 value={reflection}
                 onChange={(e) => setReflection(e.target.value)}
-                placeholder="这次探索给你带来了什么..."
+                placeholder="写下你的反思..."
                 rows={6}
-                disabled={cooldownRemaining > 0 || atLimit}
-                className="w-full bg-bg-card border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:border-fire-flame focus:outline-none resize-none disabled:opacity-50"
+                className="w-full bg-bg-card border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:border-fire-flame focus:outline-none resize-none"
               />
             </div>
-          </div>
 
-          <div className="mt-6 flex gap-3">
+            {cooldownRemaining > 0 && (
+              <div className="mb-4 p-3 bg-orange-900/30 border border-orange-500 rounded-lg">
+                <p className="text-orange-400 text-center">
+                  请等待 {cooldownRemaining}s 后再试
+                </p>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-900/30 border border-red-500 rounded-lg">
+                <p className="text-red-400 text-center">{error}</p>
+              </div>
+            )}
+
             <button
-              onClick={handleCancel}
-              className="flex-1 py-2 border border-gray-600 rounded"
-            >
-              取消
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={!reflection.trim() || cooldownRemaining > 0 || atLimit || isSubmitting}
-              className={`flex-1 py-2 rounded ${
-                reflection.trim() && cooldownRemaining === 0 && !atLimit && !isSubmitting
+              onClick={handleRekindle}
+              disabled={!canRekindle}
+              className={`w-full py-3 rounded-lg ${
+                canRekindle
                   ? 'bg-fire-flame text-white'
                   : 'bg-gray-700 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {isSubmitting ? '提交中...' : '完成探索'}
+              {loading ? '重新点燃中...' : '重新点燃'}
             </button>
-          </div>
-        </section>
+          </section>
+        )}
+
+        {step === 'review' && (
+          <section>
+            <h2 className="text-lg font-medium mb-4">AI 重新点燃的火种</h2>
+
+            <div className="space-y-3">
+              {sparks.map((spark, index) => (
+                <RekindleSparkCard
+                  key={index}
+                  content={spark.content}
+                  onRetain={() => handleRetain(index)}
+                  onDiscard={() => handleDiscard(index)}
+                  retained={spark.retained}
+                  discarded={spark.discarded}
+                />
+              ))}
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={handleBack}
+                className="flex-1 py-2 border border-gray-600 rounded"
+              >
+                上一步
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex-1 py-2 bg-fire-flame text-white rounded"
+              >
+                保存火种
+              </button>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   )

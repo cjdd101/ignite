@@ -1,183 +1,233 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { RekindlePage } from '@/pages/RekindlePage'
-import { db } from '@/lib/db'
 import { useFlameStore } from '@/stores/flameStore'
 import { useSparkStore } from '@/stores/sparkStore'
+import { api } from '@/lib/api'
+
+vi.mock('@/stores/flameStore')
+vi.mock('@/stores/sparkStore')
+vi.mock('@/lib/api')
+
+const mockUseFlameStore = useFlameStore as unknown as ReturnType<typeof vi.fn>
+const mockUseSparkStore = useSparkStore as unknown as ReturnType<typeof vi.fn>
+const mockApi = api as unknown as ReturnType<typeof vi.fn>
 
 const renderWithRouter = (ui: React.ReactElement) => {
   return render(ui, { wrapper: BrowserRouter })
 }
 
-const resetStores = () => {
-  useFlameStore.setState({ flames: [], wildFlames: [], loading: false, error: null })
-  useSparkStore.setState({ sparks: [], loading: false, error: null })
-}
-
 describe('RekindlePage', () => {
-  beforeEach(async () => {
-    await db.flames.clear()
-    await db.sparks.clear()
-    resetStores()
-  })
+  const mockAddSpark = vi.fn().mockResolvedValue({ id: 'spark-1' })
+  const mockAddFlame = vi.fn()
 
-  describe('rendering', () => {
-    it('shows "取火" title in h1 when flame exists', async () => {
-      // Add a real flame first
-      await db.flames.add({
-        id: 'flame-1',
-        title: '测试烈焰',
-        description: '测试描述',
-        status: 'active',
-        prairieId: null,
-        sourceSparkId: null,
-        igniteBatchId: null,
-        userRecord: null,
-        completedAt: null,
-        createdAt: Date.now(),
-        isDeleted: false,
-        rekindleCount: 0,
-        lastRekindleTime: null,
-      })
-
-      renderWithRouter(<RekindlePage flameId="flame-1" />)
-
-      await waitFor(() => {
-        const h1 = screen.getByRole('heading', { level: 1 })
-        expect(h1).toHaveTextContent('取火')
-      })
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAddSpark.mockResolvedValue({ id: 'spark-1' })
+    mockUseFlameStore.mockReturnValue({
+      flames: [],
+      fetchFlames: vi.fn(),
+      addFlame: mockAddFlame,
     })
-
-    it('shows flame title being rekindled', async () => {
-      await db.flames.add({
-        id: 'flame-1',
-        title: '测试烈焰',
-        description: '测试描述',
-        status: 'active',
-        prairieId: null,
-        sourceSparkId: null,
-        igniteBatchId: null,
-        userRecord: null,
-        completedAt: null,
-        createdAt: Date.now(),
-        isDeleted: false,
-        rekindleCount: 0,
-        lastRekindleTime: null,
-      })
-
-      renderWithRouter(<RekindlePage flameId="flame-1" />)
-
-      await waitFor(() => {
-        expect(screen.getByText('测试烈焰')).toBeInTheDocument()
-      })
-    })
-
-    it('shows error when flame not found', () => {
-      renderWithRouter(<RekindlePage flameId="nonexistent" />)
-      expect(screen.getByText('烈焰不存在')).toBeInTheDocument()
+    mockUseSparkStore.mockReturnValue({
+      sparks: [],
+      fetchSparks: vi.fn(),
+      addSpark: mockAddSpark,
     })
   })
 
-  describe('rekindle form', () => {
-    it('has reflection input field', async () => {
-      await db.flames.add({
-        id: 'flame-1',
-        title: '测试烈焰',
-        description: '测试描述',
-        status: 'active',
-        prairieId: null,
-        sourceSparkId: null,
-        igniteBatchId: null,
-        userRecord: null,
-        completedAt: null,
-        createdAt: Date.now(),
-        isDeleted: false,
-        rekindleCount: 0,
-        lastRekindleTime: null,
-      })
-
-      renderWithRouter(<RekindlePage flameId="flame-1" />)
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText('这次探索给你带来了什么...')).toBeInTheDocument()
-      })
+  describe('step 1: reflection', () => {
+    it('should render reflection textarea and rekindle button', () => {
+      renderWithRouter(<RekindlePage />)
+      expect(screen.getByPlaceholderText(/写下你的反思/)).toBeDefined()
+      expect(screen.getByRole('button', { name: '重新点燃' })).toBeDefined()
     })
 
-    it('has submit button', async () => {
-      await db.flames.add({
-        id: 'flame-1',
-        title: '测试烈焰',
-        description: '测试描述',
-        status: 'active',
-        prairieId: null,
-        sourceSparkId: null,
-        igniteBatchId: null,
-        userRecord: null,
-        completedAt: null,
-        createdAt: Date.now(),
-        isDeleted: false,
-        rekindleCount: 0,
-        lastRekindleTime: null,
-      })
+    it('should disable rekindle button when reflection is empty', () => {
+      renderWithRouter(<RekindlePage />)
+      expect(screen.getByRole('button', { name: '重新点燃' })).toBeDisabled()
+    })
 
-      renderWithRouter(<RekindlePage flameId="flame-1" />)
+    it('should enable rekindle button when user types reflection', async () => {
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: '今天学到了新东西' } })
+      expect(screen.getByRole('button', { name: '重新点燃' })).not.toBeDisabled()
+    })
+
+    it('should show loading state when rekindling', () => {
+      vi.mock('@/lib/api', () => ({
+        api: {
+          rekindle: vi.fn().mockImplementation(() => new Promise(() => {})),
+        },
+      }))
+
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
+      fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
+      expect(screen.getByText('重新点燃中...')).toBeDefined()
+    })
+
+    it('should show error message when rekindle fails', async () => {
+      mockApi.rekindle = vi.fn().mockRejectedValue(new Error('AI unavailable'))
+
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
+      fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: '完成探索' })).toBeInTheDocument()
+        expect(screen.getByText('重新点燃失败')).toBeDefined()
       })
     })
   })
 
-  describe('rekindle process', () => {
-    it('shows cooldown message when rekindling too soon', async () => {
-      // Add a flame that was recently rekindled
-      await db.flames.add({
-        id: 'flame-1',
-        title: '测试烈焰',
-        description: '测试描述',
-        status: 'active',
-        prairieId: null,
-        sourceSparkId: null,
-        igniteBatchId: null,
-        userRecord: null,
-        completedAt: null,
-        createdAt: Date.now(),
-        isDeleted: false,
-        rekindleCount: 1,
-        lastRekindleTime: Date.now() - 3000, // 3 seconds ago
+  describe('step 2: review sparks', () => {
+    it('should show sparks after successful rekindle', async () => {
+      mockApi.rekindle = vi.fn().mockResolvedValue({
+        sparks: [
+          { content: '反思1', type: '阅读' },
+          { content: '反思2', type: '观看' },
+        ],
       })
 
-      renderWithRouter(<RekindlePage flameId="flame-1" />)
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
+      fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
       await waitFor(() => {
-        expect(screen.getByText(/重新取火/)).toBeInTheDocument()
+        expect(screen.getByText('反思1')).toBeDefined()
+        expect(screen.getByText('反思2')).toBeDefined()
+      })
+    })
+
+    it('should show RekindleSparkCard for each spark', async () => {
+      mockApi.rekindle = vi.fn().mockResolvedValue({
+        sparks: [
+          { content: 'spark1', type: '阅读' },
+          { content: 'spark2', type: '观看' },
+          { content: 'spark3', type: '实践' },
+        ],
+      })
+
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
+      fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
+
+      await waitFor(() => {
+        expect(screen.getAllByText('保留')).toHaveLength(3)
+        expect(screen.getAllByText('丢弃')).toHaveLength(3)
+      })
+    })
+
+    it('should allow going back to step 1', async () => {
+      mockApi.rekindle = vi.fn().mockResolvedValue({
+        sparks: [{ content: 'spark1', type: '阅读' }],
+      })
+
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
+      fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('spark1')).toBeDefined()
+      })
+
+      fireEvent.click(screen.getByRole('button', { name: '上一步' }))
+
+      expect(screen.getByPlaceholderText(/写下你的反思/)).toBeDefined()
+    })
+  })
+
+  describe('save sparks', () => {
+    it('should save only retained sparks when confirm is clicked', async () => {
+      mockApi.rekindle = vi.fn().mockResolvedValue({
+        sparks: [
+          { content: 'spark1', type: '阅读' },
+          { content: 'spark2', type: '观看' },
+        ],
+      })
+
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
+      fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('spark1')).toBeDefined()
+      })
+
+      const retainButtons = screen.getAllByText('保留')
+      fireEvent.click(retainButtons[0])
+
+      fireEvent.click(screen.getByRole('button', { name: '保存火种' }))
+
+      await waitFor(() => {
+        expect(mockAddSpark).toHaveBeenCalledTimes(1)
+        expect(mockAddSpark).toHaveBeenCalledWith('spark1', 'ai_rekindle')
+      })
+    })
+
+    it('should not save any sparks when all are discarded', async () => {
+      mockApi.rekindle = vi.fn().mockResolvedValue({
+        sparks: [
+          { content: 'spark1', type: '阅读' },
+          { content: 'spark2', type: '观看' },
+        ],
+      })
+
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
+      fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('spark1')).toBeDefined()
+      })
+
+      const discardButtons = screen.getAllByText('丢弃')
+      fireEvent.click(discardButtons[0])
+      fireEvent.click(discardButtons[1])
+
+      fireEvent.click(screen.getByRole('button', { name: '保存火种' }))
+
+      expect(mockAddSpark).not.toHaveBeenCalled()
+    })
+
+    it('should save all sparks when none are discarded', async () => {
+      mockApi.rekindle = vi.fn().mockResolvedValue({
+        sparks: [
+          { content: 'spark1', type: '阅读' },
+          { content: 'spark2', type: '观看' },
+        ],
+      })
+
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
+      fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('spark1')).toBeDefined()
+      })
+
+      fireEvent.click(screen.getByRole('button', { name: '保存火种' }))
+
+      await waitFor(() => {
+        expect(mockAddSpark).toHaveBeenCalledTimes(2)
       })
     })
   })
 
-  describe('navigation', () => {
-    it('has cancel button', async () => {
-      await db.flames.add({
-        id: 'flame-1',
-        title: '测试烈焰',
-        description: '测试描述',
-        status: 'active',
-        prairieId: null,
-        sourceSparkId: null,
-        igniteBatchId: null,
-        userRecord: null,
-        completedAt: null,
-        createdAt: Date.now(),
-        isDeleted: false,
-        rekindleCount: 0,
-        lastRekindleTime: null,
+  describe('cooldown', () => {
+    it('should show cooldown timer when flame limit exceeded', async () => {
+      mockUseFlameStore.mockReturnValue({
+        flames: Array(11).fill({}),
+        fetchFlames: vi.fn(),
+        addFlame: mockAddFlame,
       })
 
-      renderWithRouter(<RekindlePage flameId="flame-1" />)
+      renderWithRouter(<RekindlePage />)
+      fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: '取消' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: '重新点燃' })).toBeDisabled()
       })
     })
   })
