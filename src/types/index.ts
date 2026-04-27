@@ -1,7 +1,7 @@
 export interface Spark {
   id: string
   content: string
-  sourceType: 'user' | 'ai_rekindle' | 'ai_seed' | 'ai_explore' | 'rekindle'
+  sourceType: 'user' | 'ai_rekindle' | 'ai_seed' | 'ai_explore'
   sourceFlameId?: string
   sourcePrairieId?: string
   sourceSparkId?: string
@@ -13,7 +13,9 @@ export interface Flame {
   id: string
   title: string
   description?: string
-  status: 'active' | 'archived'
+  recommendationReason?: string
+  searchPhrase?: string
+  status: 'burning' | 'burned'
   prairieId?: string
   sourceSparkId?: string
   igniteBatchId?: string
