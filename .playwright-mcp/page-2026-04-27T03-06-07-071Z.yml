@@ -1,0 +1,266 @@
+- generic [ref=e2]:
+  - heading "🔥 点燃产品设计审视报告" [level=1] [ref=e3]
+  - generic [ref=e4]:
+    - generic [ref=e5]: 火种 Spark
+    - generic [ref=e7]: 烈焰 Flame
+    - generic [ref=e9]: 草原 Prairie
+  - heading "一、核心概念定义" [level=2] [ref=e11]
+  - generic [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - text: 🔥 火种
+        - text: 灵感碎片，不可执行
+      - generic [ref=e15]: ——点燃——→
+      - generic [ref=e16]:
+        - text: 🔥 烈焰
+        - text: 可执行探索任务
+      - generic [ref=e17]: ——取火——→
+      - generic [ref=e18]:
+        - text: 🔥 火种
+        - text: 新灵感循环
+    - paragraph [ref=e19]: 无数烈焰汇聚 → 🌿 草原（跨时间叙事脉络容器）
+  - heading "二、\"标签\"与\"草原\"概念不一致问题汇总 需修改" [level=2] [ref=e20]:
+    - text: 二、"标签"与"草原"概念不一致问题汇总
+    - generic [ref=e21]: 需修改
+  - paragraph [ref=e22]:
+    - text: 设计文档明确：草原 = 项目标题级叙事脉络，标签在设计文档中应指代草原。
+    - text: 但技术规格中大量使用"标签"概念，与设计文档不一致。
+  - table [ref=e23]:
+    - rowgroup [ref=e24]:
+      - row "位置 技术规格写法 应改为 严重程度" [ref=e25]:
+        - columnheader "位置" [ref=e26]
+        - columnheader "技术规格写法" [ref=e27]
+        - columnheader "应改为" [ref=e28]
+        - columnheader "严重程度" [ref=e29]
+      - 'row "3.1 点燃辅助 existingTags \"existingTags\": [\"标签1\", \"标签2\"] \"existingPrairies\": [\"草原1\", \"草原2\"] 严重" [ref=e30]':
+        - cell "3.1 点燃辅助 existingTags" [ref=e31]
+        - 'cell "\"existingTags\": [\"标签1\", \"标签2\"]" [ref=e32]':
+          - code [ref=e33]: "\"existingTags\": [\"标签1\", \"标签2\"]"
+        - 'cell "\"existingPrairies\": [\"草原1\", \"草原2\"]" [ref=e34]':
+          - code [ref=e35]: "\"existingPrairies\": [\"草原1\", \"草原2\"]"
+        - cell "严重" [ref=e36]:
+          - generic [ref=e37]: 严重
+      - row "3.1 suggestedTag / newTagSuggestion \"suggestedTag\", \"newTagSuggestion\" \"suggestedPrairie\", \"newPrairieSuggestion\" 严重" [ref=e38]:
+        - cell "3.1 suggestedTag / newTagSuggestion" [ref=e39]
+        - cell "\"suggestedTag\", \"newTagSuggestion\"" [ref=e40]:
+          - code [ref=e41]: "\"suggestedTag\""
+          - text: ","
+          - code [ref=e42]: "\"newTagSuggestion\""
+        - cell "\"suggestedPrairie\", \"newPrairieSuggestion\"" [ref=e43]:
+          - code [ref=e44]: "\"suggestedPrairie\""
+          - text: ","
+          - code [ref=e45]: "\"newPrairieSuggestion\""
+        - cell "严重" [ref=e46]:
+          - generic [ref=e47]: 严重
+      - 'row "3.2 取火 sourceTag \"sourceTag\": \"所属标签\" \"sourcePrairie\": \"所属草原名\" 严重" [ref=e48]':
+        - cell "3.2 取火 sourceTag" [ref=e49]
+        - 'cell "\"sourceTag\": \"所属标签\"" [ref=e50]':
+          - code [ref=e51]: "\"sourceTag\": \"所属标签\""
+        - 'cell "\"sourcePrairie\": \"所属草原名\"" [ref=e52]':
+          - code [ref=e53]: "\"sourcePrairie\": \"所属草原名\""
+        - cell "严重" [ref=e54]:
+          - generic [ref=e55]: 严重
+      - 'row "3.3 整理 existingTags \"existingTags\": [\"存在主义探索\"] \"existingPrairies\": [\"存在主义探索\"] 严重" [ref=e56]':
+        - cell "3.3 整理 existingTags" [ref=e57]
+        - 'cell "\"existingTags\": [\"存在主义探索\"]" [ref=e58]':
+          - code [ref=e59]: "\"existingTags\": [\"存在主义探索\"]"
+        - 'cell "\"existingPrairies\": [\"存在主义探索\"]" [ref=e60]':
+          - code [ref=e61]: "\"existingPrairies\": [\"存在主义探索\"]"
+        - cell "严重" [ref=e62]:
+          - generic [ref=e63]: 严重
+      - row "3.3 targetTag / newTagName \"targetTag\", \"newTagName\" \"targetPrairie\", \"newPrairieName\" 严重" [ref=e64]:
+        - cell "3.3 targetTag / newTagName" [ref=e65]
+        - cell "\"targetTag\", \"newTagName\"" [ref=e66]:
+          - code [ref=e67]: "\"targetTag\""
+          - text: ","
+          - code [ref=e68]: "\"newTagName\""
+        - cell "\"targetPrairie\", \"newPrairieName\"" [ref=e69]:
+          - code [ref=e70]: "\"targetPrairie\""
+          - text: ","
+          - code [ref=e71]: "\"newPrairieName\""
+        - cell "严重" [ref=e72]:
+          - generic [ref=e73]: 严重
+      - row "3.4 探索 existingTags \"existingTags\" \"existingPrairies\" 严重" [ref=e74]:
+        - cell "3.4 探索 existingTags" [ref=e75]
+        - cell "\"existingTags\"" [ref=e76]:
+          - code [ref=e77]: "\"existingTags\""
+        - cell "\"existingPrairies\"" [ref=e78]:
+          - code [ref=e79]: "\"existingPrairies\""
+        - cell "严重" [ref=e80]:
+          - generic [ref=e81]: 严重
+      - row "3.5 种子缓存 existingTags \"existingTags\" \"existingPrairies\" 严重" [ref=e82]:
+        - cell "3.5 种子缓存 existingTags" [ref=e83]
+        - cell "\"existingTags\"" [ref=e84]:
+          - code [ref=e85]: "\"existingTags\""
+        - cell "\"existingPrairies\"" [ref=e86]:
+          - code [ref=e87]: "\"existingPrairies\""
+        - cell "严重" [ref=e88]:
+          - generic [ref=e89]: 严重
+      - row "3.6 标签重名校验 \"tagName\", validate-tag \"prairieName\", validate-prairie 严重" [ref=e90]:
+        - cell "3.6 标签重名校验" [ref=e91]
+        - cell "\"tagName\", validate-tag" [ref=e92]:
+          - code [ref=e93]: "\"tagName\""
+          - text: ","
+          - code [ref=e94]: validate-tag
+        - cell "\"prairieName\", validate-prairie" [ref=e95]:
+          - code [ref=e96]: "\"prairieName\""
+          - text: ","
+          - code [ref=e97]: validate-prairie
+        - cell "严重" [ref=e98]:
+          - generic [ref=e99]: 严重
+      - row "4 业务规则 - 标签名唯一 标签名唯一 草原名唯一 严重" [ref=e100]:
+        - cell "4 业务规则 - 标签名唯一" [ref=e101]
+        - cell "标签名唯一" [ref=e102]:
+          - code [ref=e103]: 标签名唯一
+        - cell "草原名唯一" [ref=e104]:
+          - code [ref=e105]: 草原名唯一
+        - cell "严重" [ref=e106]:
+          - generic [ref=e107]: 严重
+      - row "设计文档 4.2 流程C - 已有标签 已有标签 已有草原 严重" [ref=e108]:
+        - cell "设计文档 4.2 流程C - 已有标签" [ref=e109]
+        - cell "已有标签" [ref=e110]:
+          - code [ref=e111]: 已有标签
+        - cell "已有草原" [ref=e112]:
+          - code [ref=e113]: 已有草原
+        - cell "严重" [ref=e114]:
+          - generic [ref=e115]: 严重
+      - row "设计文档 6.3 Prompt - 已有标签 已有标签 已有草原 严重" [ref=e116]:
+        - cell "设计文档 6.3 Prompt - 已有标签" [ref=e117]
+        - cell "已有标签" [ref=e118]:
+          - code [ref=e119]: 已有标签
+        - cell "已有草原" [ref=e120]:
+          - code [ref=e121]: 已有草原
+        - cell "严重" [ref=e122]:
+          - generic [ref=e123]: 严重
+      - row "设计文档 6.7 标签重名校验 检查标签名 检查草原名 严重" [ref=e124]:
+        - cell "设计文档 6.7 标签重名校验" [ref=e125]
+        - cell "检查标签名" [ref=e126]:
+          - code [ref=e127]: 检查标签名
+        - cell "检查草原名" [ref=e128]:
+          - code [ref=e129]: 检查草原名
+        - cell "严重" [ref=e130]:
+          - generic [ref=e131]: 严重
+  - heading "三、其他不一致问题" [level=2] [ref=e132]
+  - generic [ref=e133]:
+    - heading "3.1 igniteBatchId 必填性" [level=3] [ref=e134]
+    - paragraph [ref=e135]:
+      - strong [ref=e136]: 技术规格：
+      - code [ref=e137]: "igniteBatchId: string"
+      - text: （必填，无?）
+    - paragraph [ref=e138]:
+      - strong [ref=e139]: 设计文档：
+      - text: 未明确说明，但"手动创建烈焰"场景未提及此字段
+    - paragraph [ref=e140]:
+      - strong [ref=e141]: 建议：
+      - text: 技术规格改为
+      - code [ref=e142]: "igniteBatchId?: string"
+      - text: ，手动创建时可不填
+  - generic [ref=e143]:
+    - heading "3.2 取火冷却时间示例矛盾" [level=3] [ref=e144]
+    - paragraph [ref=e145]:
+      - strong [ref=e146]: 文档描述：
+      - text: 冷却时间 ≥ 5秒
+    - paragraph [ref=e147]:
+      - strong [ref=e148]: 错误提示示例：
+      - code [ref=e149]: 重新取火 (3s)
+    - paragraph [ref=e150]:
+      - strong [ref=e151]: 建议：
+      - text: 统一为5秒，错误提示改为
+      - code [ref=e152]: 重新取火 (5s)
+  - generic [ref=e153]:
+    - heading "3.3 草原名称字段歧义" [level=3] [ref=e154]
+    - paragraph [ref=e155]:
+      - strong [ref=e156]: 问题：
+      - text: AI接口中用"标签名"指代草原名，但 prairies 表的 name 字段就是草原名
+    - paragraph [ref=e157]:
+      - strong [ref=e158]: 混淆场景：
+    - list [ref=e159]:
+      - listitem [ref=e160]:
+        - text: 整理接口：
+        - code [ref=e161]: "targetTag: \"已有标签名\""
+        - text: → 实际指 prairie.name
+      - listitem [ref=e162]:
+        - text: 点燃接口：
+        - code [ref=e163]: suggestedTag
+        - text: → 实际建议的是 prairie.name
+    - paragraph [ref=e164]:
+      - strong [ref=e165]: 建议：
+      - text: 统一使用"草原"术语，避免歧义
+  - heading "四、数据模型关系图" [level=2] [ref=e166]
+  - generic [ref=e168]: "┌─────────────────────────────────────────────────────────────────────────┐ │ IndexedDB: kindling │ ├─────────────────────────────────────────────────────────────────────────┤ │ │ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │ │ │ sparks │ │ flames │ │ prairies │ │ │ ├─────────────┤ ├─────────────┤ ├─────────────────────────┤ │ │ │ id │ │ id │ │ id │ │ │ │ content │ │ title │ │ name (unique) │ │ │ │ sourceType │ │ description │ │ description │ │ │ │ sourceFlameId│──────│ status │ │ status │ │ │ │ sourcePrairieId │ prairieId │←──────│ archivedAt │ │ │ │ sourceSparkId│ │ sourceSparkId │ createdAt │ │ │ │ createdAt │ │ igniteBatchId│ └─────────────────────────┘ │ │ │ isDeleted │ │ userRecord │ │ │ │ └─────────────┘ │ completedAt │ │ │ │ │ │ createdAt │ │ │ │ │ │ isDeleted │ │ │ │ │ │ rekindleCount│ 1:N │ │ │ │ lastRekindleTime ┌───┘ │ │ │ └─────────────────────────┘ │ │ │ ↑ │ │ │ │ │ │ │ ┌─────────────────┐ │ │ │ │ rekindleRecords │ │ │ │ ├─────────────────┤ │ │ └─────────────│ id │ │ │ │ flameId │ │ │ │ sparksResult │ │ │ │ retainedSparkIds│ │ │ │ createdAt │ │ │ └─────────────────┘ │ │ │ │ ┌─────────────────────────────────────────────────────────────────┐ │ │ │ seedBuffer │ │ │ ├─────────────────────────────────────────────────────────────────┤ │ │ │ id | content | createdAt | used │ │ │ └─────────────────────────────────────────────────────────────────┘ │ │ │ └─────────────────────────────────────────────────────────────────────────┘"
+  - heading "五、核心用户旅程" [level=2] [ref=e169]
+  - generic [ref=e170]:
+    - heading "Day 1 - 邂逅第一粒火种" [level=3] [ref=e171]
+    - generic [ref=e172]:
+      - generic [ref=e173]: 打开火盆
+      - generic [ref=e174]: →
+      - generic [ref=e175]: 看到5粒预设火种
+      - generic [ref=e176]: →
+      - generic [ref=e177]: 点击火种「点燃」
+      - generic [ref=e178]: →
+      - generic [ref=e179]: 选择探索视角
+      - generic [ref=e180]: →
+      - generic [ref=e181]: 确认第一步行
+      - generic [ref=e182]: →
+      - generic [ref=e183]: 保存烈焰
+      - generic [ref=e184]: →
+      - generic [ref=e185]: 跳转平台
+  - generic [ref=e186]:
+    - heading "完成燃烧 → 取火闭环" [level=3] [ref=e187]
+    - generic [ref=e188]:
+      - generic [ref=e189]: 点击完成
+      - generic [ref=e190]: →
+      - generic [ref=e191]: 填写感想（必填）
+      - generic [ref=e192]: →
+      - generic [ref=e193]: AI生成3粒火种
+      - generic [ref=e194]: →
+      - generic [ref=e195]: 逐粒保留/丢弃
+      - generic [ref=e196]: →
+      - generic [ref=e197]: 落回火盆
+  - generic [ref=e198]:
+    - heading "野火 → 草原 整理流程" [level=3] [ref=e199]
+    - generic [ref=e200]:
+      - generic [ref=e201]: 野火区
+      - generic [ref=e202]: →
+      - generic [ref=e203]: 点击「整理」
+      - generic [ref=e204]: →
+      - generic [ref=e205]: AI分析归类建议
+      - generic [ref=e206]: →
+      - generic [ref=e207]: 分组总览
+      - generic [ref=e208]: →
+      - generic [ref=e209]: 逐条确认
+      - generic [ref=e210]: →
+      - generic [ref=e211]: 归入草原
+  - heading "六、修改建议汇总" [level=2] [ref=e212]
+  - table [ref=e213]:
+    - rowgroup [ref=e214]:
+      - row "类型 问题 修改方案 涉及文件" [ref=e215]:
+        - columnheader "类型" [ref=e216]
+        - columnheader "问题" [ref=e217]
+        - columnheader "修改方案" [ref=e218]
+        - columnheader "涉及文件" [ref=e219]
+      - row "术语统一 技术规格中\"标签\"应改为\"草原\" 全部12处标签相关术语替换为草原 技术规格文档.md" [ref=e220]:
+        - cell "术语统一" [ref=e221]
+        - cell "技术规格中\"标签\"应改为\"草原\"" [ref=e222]
+        - cell "全部12处标签相关术语替换为草原" [ref=e223]
+        - cell "技术规格文档.md" [ref=e224]
+      - 'row "字段定义 igniteBatchId 必填性不明确 改为可选字段 igniteBatchId?: string 技术规格文档.md" [ref=e225]':
+        - cell "字段定义" [ref=e226]
+        - cell "igniteBatchId 必填性不明确" [ref=e227]
+        - 'cell "改为可选字段 igniteBatchId?: string" [ref=e228]':
+          - text: 改为可选字段
+          - code [ref=e229]: "igniteBatchId?: string"
+        - cell "技术规格文档.md" [ref=e230]
+      - row "数值统一 冷却时间示例3s与规则5s矛盾 统一为5秒 技术规格文档.md" [ref=e231]:
+        - cell "数值统一" [ref=e232]
+        - cell "冷却时间示例3s与规则5s矛盾" [ref=e233]
+        - cell "统一为5秒" [ref=e234]
+        - cell "技术规格文档.md" [ref=e235]
+      - row "术语统一 设计文档中仍有\"标签\"遗留 全部替换为\"草原\" 设计文档.md" [ref=e236]:
+        - cell "术语统一" [ref=e237]
+        - cell "设计文档中仍有\"标签\"遗留" [ref=e238]
+        - cell "全部替换为\"草原\"" [ref=e239]
+        - cell "设计文档.md" [ref=e240]
+  - generic [ref=e241]:
+    - paragraph [ref=e242]: 报告生成时间：2026-04-27
+    - paragraph [ref=e243]: 基于《点燃》设计文档 V4.0 + 技术规格文档 V2.0

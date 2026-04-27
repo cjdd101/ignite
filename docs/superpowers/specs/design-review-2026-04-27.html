@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点燃 - 设计审视报告</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1a1a2e; color: #eee; padding: 20px; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: #ff6b35; margin-bottom: 30px; font-size: 2em; }
+        h2 { color: #ff9f1c; margin: 30px 0 15px; border-bottom: 2px solid #ff9f1c; padding-bottom: 8px; }
+        h3 { color: #2ec4b6; margin: 20px 0 10px; }
+        .card { background: #16213e; border-radius: 12px; padding: 20px; margin: 15px 0; border-left: 4px solid #ff6b35; }
+        .card.warning { border-left-color: #ff9f1c; }
+        .card.info { border-left-color: #2ec4b6; }
+        .card.error { border-left-color: #e71d36; }
+        code { background: #0f3460; padding: 2px 8px; border-radius: 4px; color: #ff6b35; font-size: 0.9em; }
+        pre { background: #0f3460; padding: 15px; border-radius: 8px; overflow-x: auto; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
+        th { background: #0f3460; color: #ff9f1c; }
+        tr:hover { background: #1a1a2e; }
+        .dot { color: #ff6b35; font-weight: bold; }
+        .arrow { color: #2ec4b6; }
+        .flow { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+        .node { background: #0f3460; padding: 15px 25px; border-radius: 8px; text-align: center; min-width: 120px; }
+        .node.spark { border: 2px solid #ff6b35; }
+        .node.flame { border: 2px solid #ff9f1c; }
+        .node.prairie { border: 2px solid #2ec4b6; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 8px; }
+        .badge.error { background: #e71d36; }
+        .badge.warning { background: #ff9f1c; color: #000; }
+        .badge.ok { background: #2ec4b6; }
+        .diagram { background: #0f3460; border-radius: 8px; padding: 30px; margin: 15px 0; text-align: center; }
+        .legend { display: flex; justify-content: center; gap: 30px; margin: 20px 0; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        ul { margin-left: 20px; }
+        li { margin: 8px 0; }
+        .compare-table td:nth-child(1) { color: #ff6b35; font-weight: bold; }
+        .compare-table td:nth-child(2) { color: #ff9f1c; }
+        .compare-table td:nth-child(3) { color: #2ec4b6; }
+        .highlight { background: #ff6b35; color: #000; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 点燃产品设计审视报告</h1>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #ff6b35;"></div>火种 Spark</div>
+            <div class="legend-item"><div class="legend-color" style="background: #ff9f1c;"></div>烈焰 Flame</div>
+            <div class="legend-item"><div class="legend-color" style="background: #2ec4b6;"></div>草原 Prairie</div>
+        </div>
+
+        <!-- 核心概念 -->
+        <h2>一、核心概念定义</h2>
+        <div class="diagram">
+            <div class="flow">
+                <div class="node spark">🔥 火种<br><small>灵感碎片，不可执行</small></div>
+                <span class="arrow">——点燃——→</span>
+                <div class="node flame">🔥 烈焰<br><small>可执行探索任务</small></div>
+                <span class="arrow">——取火——→</span>
+                <div class="node spark">🔥 火种<br><small>新灵感循环</small></div>
+            </div>
+            <p style="margin-top: 15px; color: #888;">无数烈焰汇聚 → <span style="color: #2ec4b6;">🌿 草原</span>（跨时间叙事脉络容器）</p>
+        </div>
+
+        <!-- 标签vs草原 不一致汇总 -->
+        <h2>二、"标签"与"草原"概念不一致问题汇总 <span class="badge error">需修改</span></h2>
+
+        <p style="color: #888; margin-bottom: 15px;">
+            设计文档明确：草原 = 项目标题级叙事脉络，标签在设计文档中应指代草原。<br>
+            但技术规格中大量使用"标签"概念，与设计文档不一致。
+        </p>
+
+        <table>
+            <tr>
+                <th>位置</th>
+                <th>技术规格写法</th>
+                <th>应改为</th>
+                <th>严重程度</th>
+            </tr>
+            <tr>
+                <td>3.1 点燃辅助 existingTags</td>
+                <td><code>"existingTags": ["标签1", "标签2"]</code></td>
+                <td><code>"existingPrairies": ["草原1", "草原2"]</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>3.1 suggestedTag / newTagSuggestion</td>
+                <td><code>"suggestedTag"</code>, <code>"newTagSuggestion"</code></td>
+                <td><code>"suggestedPrairie"</code>, <code>"newPrairieSuggestion"</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>3.2 取火 sourceTag</td>
+                <td><code>"sourceTag": "所属标签"</code></td>
+                <td><code>"sourcePrairie": "所属草原名"</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>3.3 整理 existingTags</td>
+                <td><code>"existingTags": ["存在主义探索"]</code></td>
+                <td><code>"existingPrairies": ["存在主义探索"]</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>3.3 targetTag / newTagName</td>
+                <td><code>"targetTag"</code>, <code>"newTagName"</code></td>
+                <td><code>"targetPrairie"</code>, <code>"newPrairieName"</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>3.4 探索 existingTags</td>
+                <td><code>"existingTags"</code></td>
+                <td><code>"existingPrairies"</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>3.5 种子缓存 existingTags</td>
+                <td><code>"existingTags"</code></td>
+                <td><code>"existingPrairies"</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>3.6 标签重名校验</td>
+                <td><code>"tagName"</code>, <code>validate-tag</code></td>
+                <td><code>"prairieName"</code>, <code>validate-prairie</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>4 业务规则 - 标签名唯一</td>
+                <td><code>标签名唯一</code></td>
+                <td><code>草原名唯一</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>设计文档 4.2 流程C - 已有标签</td>
+                <td><code>已有标签</code></td>
+                <td><code>已有草原</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>设计文档 6.3 Prompt - 已有标签</td>
+                <td><code>已有标签</code></td>
+                <td><code>已有草原</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+            <tr>
+                <td>设计文档 6.7 标签重名校验</td>
+                <td><code>检查标签名</code></td>
+                <td><code>检查草原名</code></td>
+                <td><span class="badge error">严重</span></td>
+            </tr>
+        </table>
+
+        <!-- 其他不一致 -->
+        <h2>三、其他不一致问题</h2>
+
+        <div class="card error">
+            <h3>3.1 igniteBatchId 必填性</h3>
+            <p><strong>技术规格：</strong><code>igniteBatchId: string</code>（必填，无?）</p>
+            <p><strong>设计文档：</strong>未明确说明，但"手动创建烈焰"场景未提及此字段</p>
+            <p><strong>建议：</strong>技术规格改为 <code>igniteBatchId?: string</code>，手动创建时可不填</p>
+        </div>
+
+        <div class="card error">
+            <h3>3.2 取火冷却时间示例矛盾</h3>
+            <p><strong>文档描述：</strong>冷却时间 ≥ 5秒</p>
+            <p><strong>错误提示示例：</strong><code>重新取火 (3s)</code></p>
+            <p><strong>建议：</strong>统一为5秒，错误提示改为 <code>重新取火 (5s)</code></p>
+        </div>
+
+        <div class="card error">
+            <h3>3.3 草原名称字段歧义</h3>
+            <p><strong>问题：</strong>AI接口中用"标签名"指代草原名，但 prairies 表的 name 字段就是草原名</p>
+            <p><strong>混淆场景：</strong></p>
+            <ul>
+                <li>整理接口：<code>targetTag: "已有标签名"</code> → 实际指 prairie.name</li>
+                <li>点燃接口：<code>suggestedTag</code> → 实际建议的是 prairie.name</li>
+            </ul>
+            <p><strong>建议：</strong>统一使用"草原"术语，避免歧义</p>
+        </div>
+
+        <!-- 数据模型关系图 -->
+        <h2>四、数据模型关系图</h2>
+        <div class="diagram">
+            <pre style="text-align: left; display: inline-block;">
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          IndexedDB: kindling                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────┐      ┌─────────────┐      ┌─────────────────────────┐ │
+│  │   sparks    │      │   flames    │      │       prairies          │ │
+│  ├─────────────┤      ├─────────────┤      ├─────────────────────────┤ │
+│  │ id          │      │ id          │      │ id                      │ │
+│  │ content     │      │ title       │      │ name (unique)           │ │
+│  │ sourceType  │      │ description │      │ description             │ │
+│  │ sourceFlameId│──────│ status      │      │ status                  │ │
+│  │ sourcePrairieId    │ prairieId   │←──────│ archivedAt              │ │
+│  │ sourceSparkId│     │ sourceSparkId     │ createdAt                │ │
+│  │ createdAt    │      │ igniteBatchId│     └─────────────────────────┘ │
+│  │ isDeleted   │      │ userRecord   │              │                 │
+│  └─────────────┘      │ completedAt  │              │                 │
+│        │             │ createdAt    │              │                 │
+│        │             │ isDeleted    │              │                 │
+│        │             │ rekindleCount│             1:N                │
+│        │             │ lastRekindleTime        ┌───┘                  │
+│        │             └─────────────────────────┘                       │
+│        │                       ↑                                       │
+│        │                       │                                         │
+│        │             ┌─────────────────┐                               │
+│        │             │ rekindleRecords │                               │
+│        │             ├─────────────────┤                               │
+│        └─────────────│ id              │                               │
+│                      │ flameId         │                               │
+│                      │ sparksResult    │                               │
+│                      │ retainedSparkIds│                               │
+│                      │ createdAt       │                               │
+│                      └─────────────────┘                               │
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                        seedBuffer                                │   │
+│  ├─────────────────────────────────────────────────────────────────┤   │
+│  │ id | content | createdAt | used                                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+            </pre>
+        </div>
+
+        <!-- 用户旅程 -->
+        <h2>五、核心用户旅程</h2>
+        <div class="card info">
+            <h3>Day 1 - 邂逅第一粒火种</h3>
+            <div class="flow" style="justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; padding: 10px 0;">
+                <div class="node spark" style="min-width: 80px;">打开火盆</div>
+                <span class="arrow">→</span>
+                <div class="node spark" style="min-width: 100px;">看到5粒预设火种</div>
+                <span class="arrow">→</span>
+                <div class="node spark" style="min-width: 120px;">点击火种「点燃」</div>
+                <span class="arrow">→</span>
+                <div class="node flame" style="min-width: 100px;">选择探索视角</div>
+                <span class="arrow">→</span>
+                <div class="node flame" style="min-width: 100px;">确认第一步行</div>
+                <span class="arrow">→</span>
+                <div class="node flame" style="min-width: 100px;">保存烈焰</div>
+                <span class="arrow">→</span>
+                <div class="node flame" style="min-width: 80px;">跳转平台</div>
+            </div>
+        </div>
+
+        <div class="card info">
+            <h3>完成燃烧 → 取火闭环</h3>
+            <div class="flow" style="justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; padding: 10px 0;">
+                <div class="node flame" style="min-width: 80px;">点击完成</div>
+                <span class="arrow">→</span>
+                <div class="node flame" style="min-width: 120px;">填写感想（必填）</div>
+                <span class="arrow">→</span>
+                <div class="node spark" style="min-width: 100px;">AI生成3粒火种</div>
+                <span class="arrow">→</span>
+                <div class="node spark" style="min-width: 100px;">逐粒保留/丢弃</div>
+                <span class="arrow">→</span>
+                <div class="node spark" style="min-width: 80px;">落回火盆</div>
+            </div>
+        </div>
+
+        <div class="card warning">
+            <h3>野火 → 草原 整理流程</h3>
+            <div class="flow" style="justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; padding: 10px 0;">
+                <div class="node flame" style="min-width: 80px;">野火区</div>
+                <span class="arrow">→</span>
+                <div class="node prairie" style="min-width: 100px;">点击「整理」</div>
+                <span class="arrow">→</span>
+                <div class="node prairie" style="min-width: 120px;">AI分析归类建议</div>
+                <span class="arrow">→</span>
+                <div class="node prairie" style="min-width: 100px;">分组总览</div>
+                <span class="arrow">→</span>
+                <div class="node prairie" style="min-width: 100px;">逐条确认</div>
+                <span class="arrow">→</span>
+                <div class="node prairie" style="min-width: 80px;">归入草原</div>
+            </div>
+        </div>
+
+        <!-- 修改建议汇总 -->
+        <h2>六、修改建议汇总</h2>
+        <table>
+            <tr>
+                <th>类型</th>
+                <th>问题</th>
+                <th>修改方案</th>
+                <th>涉及文件</th>
+            </tr>
+            <tr>
+                <td>术语统一</td>
+                <td>技术规格中"标签"应改为"草原"</td>
+                <td>全部12处标签相关术语替换为草原</td>
+                <td>技术规格文档.md</td>
+            </tr>
+            <tr>
+                <td>字段定义</td>
+                <td>igniteBatchId 必填性不明确</td>
+                <td>改为可选字段 <code>igniteBatchId?: string</code></td>
+                <td>技术规格文档.md</td>
+            </tr>
+            <tr>
+                <td>数值统一</td>
+                <td>冷却时间示例3s与规则5s矛盾</td>
+                <td>统一为5秒</td>
+                <td>技术规格文档.md</td>
+            </tr>
+            <tr>
+                <td>术语统一</td>
+                <td>设计文档中仍有"标签"遗留</td>
+                <td>全部替换为"草原"</td>
+                <td>设计文档.md</td>
+            </tr>
+        </table>
+
+        <div style="margin-top: 40px; padding: 20px; background: #0f3460; border-radius: 8px; text-align: center;">
+            <p style="color: #888;">报告生成时间：2026-04-27</p>
+            <p style="color: #666; font-size: 0.9em;">基于《点燃》设计文档 V4.0 + 技术规格文档 V2.0</p>
+        </div>
+    </div>
+</body>
+</html>
