@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Flame } from '@/types'
 import { useFlameStore } from '@/stores/flameStore'
 
@@ -7,9 +8,15 @@ interface FlameCardProps {
 }
 
 export function FlameCard({ flame, onDelete }: FlameCardProps) {
+  const navigate = useNavigate()
   const { deleteFlame } = useFlameStore()
 
-  const handleDelete = async () => {
+  const handleClick = () => {
+    navigate(`/prairie/${flame.id}/rekindle`)
+  }
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (onDelete) {
       onDelete(flame.id)
     } else {
@@ -18,7 +25,10 @@ export function FlameCard({ flame, onDelete }: FlameCardProps) {
   }
 
   return (
-    <div className="bg-bg-card rounded-lg p-4">
+    <div
+      className="bg-bg-card rounded-lg p-4 cursor-pointer hover:bg-bg-secondary transition-colors"
+      onClick={handleClick}
+    >
       <div className="flex justify-between items-start">
         <h3 className="font-medium text-fire-flame">{flame.title}</h3>
         {flame.status === 'active' && (

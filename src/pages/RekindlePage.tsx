@@ -13,7 +13,7 @@ const REKINDLE_COOLDOWN = 5000 // 5 seconds
 
 export function RekindlePage({ flameId }: RekindlePageProps) {
   const navigate = useNavigate()
-  const { updateFlame } = useFlameStore()
+  const { updateFlame, fetchWildFlames } = useFlameStore()
   const { addSpark } = useSparkStore()
   const [flame, setFlame] = useState<Flame | null>(null)
   const [reflection, setReflection] = useState('')
@@ -70,6 +70,7 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
     })
 
     setIsSubmitting(false)
+    await fetchWildFlames()
     navigate('/hearth')
   }
 
