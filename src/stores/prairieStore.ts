@@ -4,9 +4,11 @@ import type { Prairie } from '@/types'
 
 interface PrairieState {
   prairies: Prairie[]
+  archivedPrairies: Prairie[]
   loading: boolean
   error: string | null
   fetchPrairies: () => Promise<void>
+  fetchArchivedPrairies: () => Promise<void>
   addPrairie: (name: string, description?: string) => Promise<Prairie>
   archivePrairie: (id: string) => Promise<void>
   restorePrairie: (id: string) => Promise<void>
@@ -15,6 +17,7 @@ interface PrairieState {
 
 export const usePrairieStore = create<PrairieState>((set, get) => ({
   prairies: [],
+  archivedPrairies: [],
   loading: false,
   error: null,
 
@@ -25,6 +28,18 @@ export const usePrairieStore = create<PrairieState>((set, get) => ({
         .filter(prairie => prairie.status === 'active')
         .sortBy('createdAt')
       set({ prairies: prairies.reverse(), loading: false })
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false })
+    }
+  },
+
+  fetchArchivedPrairies: async () => {
+    set({ loading: true, error: null })
+    try {
+      const prairies = await db.prairies
+        .filter(prairie => prairie.status === 'archived')
+        .sortBy('createdAt')
+      set({ archivedPrairies: prairies.reverse(), loading: false })
     } catch (error) {
       set({ error: (error as Error).message, loading: false })
     }
