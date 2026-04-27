@@ -7,7 +7,7 @@ import { BottomNav } from '@/components/BottomNav'
 
 export function HearthPage() {
   const { sparks, fetchSparks } = useSparkStore()
-  const { seeds, fetchSeeds } = useSeedBufferStore()
+  const { seeds, fetchSeeds, addToSparks, refillBuffer } = useSeedBufferStore()
 
   useEffect(() => {
     fetchSparks()
@@ -16,6 +16,16 @@ export function HearthPage() {
 
   const sparkCount = sparks.length
   const seedCount = seeds.length
+
+  const handleSwapSeeds = async () => {
+    if (seeds.length === 0) {
+      await refillBuffer()
+    } else {
+      await addToSparks(seeds)
+    }
+    await fetchSparks()
+    await fetchSeeds()
+  }
 
   return (
     <div className="hearth-page">
@@ -39,7 +49,9 @@ export function HearthPage() {
       </main>
 
       <footer>
-        <button>换一批 ({seedCount})</button>
+        <button onClick={handleSwapSeeds} disabled={seedCount === 0}>
+          换一批 ({seedCount})
+        </button>
       </footer>
 
       <BottomNav />
