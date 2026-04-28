@@ -13,7 +13,8 @@ export class OrganizePage {
 
   async goto(): Promise<void> {
     await this.page.goto('http://localhost:5173/#/organize');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForTimeout(500);
   }
 
   async clickAnalyze(): Promise<void> {

@@ -19,8 +19,8 @@ export class KindleWizardPage {
 
   async clickGetPerspectives(): Promise<void> {
     await this.getPerspectivesButton.click();
-    // 等待 AI 响应
-    await this.page.waitForTimeout(5000);
+    // 等待 AI 响应 - 等待视角卡片出现
+    await this.page.waitForSelector('button:has-text("阅读")', { timeout: 15000 });
   }
 
   async selectFirstPerspective(): Promise<void> {

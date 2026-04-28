@@ -15,7 +15,8 @@ export class PrairiePage {
 
   async goto(): Promise<void> {
     await this.page.goto('http://localhost:5173/#/prairie');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForTimeout(500);
   }
 
   async getWildFlameCount(): Promise<number> {

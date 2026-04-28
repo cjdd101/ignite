@@ -15,7 +15,8 @@ export class ExplorePage {
 
   async goto(): Promise<void> {
     await this.page.goto('http://localhost:5173/#/explore');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForTimeout(500);
   }
 
   async search(query: string): Promise<void> {

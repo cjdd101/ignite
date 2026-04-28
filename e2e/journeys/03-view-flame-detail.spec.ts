@@ -20,6 +20,9 @@ test.describe('Journey 3: 查看烈焰详情', () => {
     await hearthPage.goto();
     await hearthPage.createSpark('查看详情测试');
     await hearthPage.clickFirstSpark();
+
+    // 先获取视角（触发AI调用），然后跳过
+    await kindlePage.clickGetPerspectives();
     await kindlePage.clickSkip();
     await kindlePage.clickNext();
     await kindlePage.selectWildFireOption();

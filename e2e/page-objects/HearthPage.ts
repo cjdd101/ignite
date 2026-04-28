@@ -17,7 +17,8 @@ export class HearthPage {
 
   async goto(): Promise<void> {
     await this.page.goto('http://localhost:5173/#/hearth');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForTimeout(500);
   }
 
   async createSpark(content: string): Promise<void> {
