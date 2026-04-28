@@ -74,8 +74,8 @@ class APIError extends Error {
   }
 }
 
-// DeepSeek API Key - set via VITE_DEEPSEEK_API_KEY environment variable
-const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY
+// DeepSeek API Key
+const API_KEY = 'sk-fe556b6e70de42b08a8c4ba57510ac5b'
 
 async function callDeepSeek(prompt: string): Promise<string> {
   if (!API_KEY) {
