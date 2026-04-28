@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { HearthPage } from '@/pages/HearthPage'
 import { PrairiePage } from '@/pages/PrairiePage'
+import { PrairieDetailPage } from '@/pages/PrairieDetailPage'
 import { ExplorePage } from '@/pages/ExplorePage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { KindleWizard } from '@/pages/KindleWizard'
@@ -35,6 +36,7 @@ function App() {
         <Route path="/hearth" element={<HearthPage />} />
         <Route path="/hearth/kindle/:sparkId" element={<KindleFromSparkWrapper />} />
         <Route path="/prairie" element={<PrairiePage />} />
+        <Route path="/prairie/:prairieId" element={<PrairieDetailPage />} />
         <Route path="/prairie/flame/create" element={<KindleWizard sparkId="" />} />
         <Route path="/prairie/:prairieId/flame/create" element={<KindleFromPrairieWrapper />} />
         <Route path="/prairie/flame/:id" element={<FlameDetailPage />} />

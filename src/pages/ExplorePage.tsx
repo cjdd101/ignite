@@ -45,8 +45,16 @@ export function ExplorePage() {
         existingPrairies: existingPrairieNames,
       })
       setSparks(response.sparks || [])
+      if (!response.sparks || response.sparks.length === 0) {
+        // AI returned empty, fall back to default recommendations
+        setRecommendations(FALLBACK_RECOMMENDATIONS)
+        setShowRecommendations(true)
+      }
     } catch (err) {
+      // AI call failed, fall back to default recommendations
       setSparks([])
+      setRecommendations(FALLBACK_RECOMMENDATIONS)
+      setShowRecommendations(true)
     } finally {
       setLoading(false)
     }

@@ -11,7 +11,13 @@ interface SeedBufferState {
   markSeedsUsed: (ids: string[]) => Promise<void>
   addToSparks: (seeds: SeedBuffer[]) => Promise<void>
   refillBuffer: () => Promise<void>
+  triggerBackgroundRefill: () => void
 }
+
+const MIN_BUFFER_THRESHOLD = 5
+const REFILL_COOLDOWN = 30000 // 30 seconds between refills
+
+let lastRefillTime = 0
 
 export const useSeedBufferStore = create<SeedBufferState>((set, get) => ({
   seeds: [],
@@ -25,9 +31,9 @@ export const useSeedBufferStore = create<SeedBufferState>((set, get) => ({
         .toArray()
       set({ seeds, loading: false })
 
-      // Auto-refill if below 10
-      if (seeds.length < 10) {
-        get().refillBuffer()
+      // Background refill if buffer is low (don't await)
+      if (seeds.length < MIN_BUFFER_THRESHOLD) {
+        get().triggerBackgroundRefill()
       }
     } catch (error) {
       set({ loading: false })
@@ -79,6 +85,7 @@ export const useSeedBufferStore = create<SeedBufferState>((set, get) => ({
       if (newSeeds.length > 0) {
         await db.seedBuffer.bulkPut(newSeeds)
       }
+      lastRefillTime = Date.now()
       await get().fetchSeeds()
     } catch (error) {
       // Fallback seeds if API fails
@@ -92,5 +99,16 @@ export const useSeedBufferStore = create<SeedBufferState>((set, get) => ({
     } finally {
       set({ loading: false })
     }
+  },
+
+  // Trigger background refill without blocking UI
+  triggerBackgroundRefill: () => {
+    const now = Date.now()
+    if (now - lastRefillTime < REFILL_COOLDOWN) {
+      return // Skip if recently refilled
+    }
+    lastRefillTime = now
+    // Fire and forget - don't await
+    get().refillBuffer()
   },
 }))

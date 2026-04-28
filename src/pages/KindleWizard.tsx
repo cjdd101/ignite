@@ -160,7 +160,7 @@ export function KindleWizard({ sparkId, prairieId: initialPrairieId }: KindleWiz
         recommendationReason: perspectives[index]?.description || '',
         searchPhrase: actionInputs[index]?.searchPhrase || perspectives[index]?.searchPhrase || '',
         status: 'burning',
-        prairieId: targetPrairieId || undefined,
+        prairieId: targetPrairieId ?? null,
         sourceSparkId: sparkId || undefined,
         igniteBatchId,
         userRecord: undefined,

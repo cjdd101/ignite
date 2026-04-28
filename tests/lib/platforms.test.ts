@@ -3,12 +3,12 @@ import { PLATFORM_WEB_URLS, buildSearchUrl } from '@/lib/platforms'
 
 describe('platforms', () => {
   it('should have all required platform URLs', () => {
-    expect(PLATFORM_URLS['B站']).toBeDefined()
-    expect(PLATFORM_URLS['知乎']).toBeDefined()
-    expect(PLATFORM_URLS['小红书']).toBeDefined()
-    expect(PLATFORM_URLS['YouTube']).toBeDefined()
-    expect(PLATFORM_URLS['Apple 播客']).toBeDefined()
-    expect(PLATFORM_URLS['Google']).toBeDefined()
+    expect(PLATFORM_WEB_URLS['B站']).toBeDefined()
+    expect(PLATFORM_WEB_URLS['知乎']).toBeDefined()
+    expect(PLATFORM_WEB_URLS['小红书']).toBeDefined()
+    expect(PLATFORM_WEB_URLS['YouTube']).toBeDefined()
+    expect(PLATFORM_WEB_URLS['Apple 播客']).toBeDefined()
+    expect(PLATFORM_WEB_URLS['Google']).toBeDefined()
   })
 
   it('should build correct B站 search URL with encoded params', () => {

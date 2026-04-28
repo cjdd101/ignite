@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useFlameStore } from '@/stores/flameStore'
 import { usePrairieStore } from '@/stores/prairieStore'
 import { FlameCard } from '@/components/FlameCard'
@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 
 export function PrairiePage() {
   const { wildFlames, fetchWildFlames } = useFlameStore()
-  const { prairies, archivedPrairies, fetchPrairies, fetchArchivedPrairies, archivePrairie } = usePrairieStore()
+  const { prairies, archivedPrairies, fetchPrairies, fetchArchivedPrairies } = usePrairieStore()
   const [showArchived, setShowArchived] = useState(false)
   const [activeTab, setActiveTab] = useState<'wild' | 'prairies'>('wild')
   const [justCreatedFlames, setJustCreatedFlames] = useState<{ title: string; searchPhrase: string }[] | null>(null)
@@ -219,7 +219,8 @@ export function PrairiePage() {
                         key={prairie.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="card card-prairie p-5 group"
+                        className="card card-prairie p-5 group cursor-pointer"
+                        onClick={() => navigate(`/prairie/${prairie.id}`)}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -230,15 +231,9 @@ export function PrairiePage() {
                               <p className="text-sm text-text-muted mt-1">{prairie.description}</p>
                             )}
                           </div>
-                          <button
-                            onClick={() => archivePrairie(prairie.id)}
-                            className="p-2 rounded-lg text-text-muted hover:text-text-secondary hover:bg-white/5 transition-colors"
-                            title="存档草原"
-                          >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.42l.82-1zM5 19V8h14v11H5zm11-5.5l-4 4-4-4 1.41-1.41L11 13.67V10h2v3.67l2.59-2.58L16 12z"/>
-                            </svg>
-                          </button>
+                          <svg className="w-5 h-5 text-text-muted group-hover:text-prairie-primary transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 18l6-6-6-6"/>
+                          </svg>
                         </div>
                       </motion.div>
                     ))}

@@ -34,6 +34,7 @@ export class HearthPage {
   }
 
   async clickFirstSpark(): Promise<void> {
+    // 点击火种卡片进入点燃向导
     const firstSpark = this.sparkList.locator('div').first();
     await firstSpark.click();
     await this.page.waitForTimeout(1000);

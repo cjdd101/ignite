@@ -1,0 +1,41 @@
+- generic [ref=e189]:
+  - generic [ref=e190]:
+    - banner [ref=e191]:
+      - generic [ref=e193]: 🌿
+      - heading "草原" [level=1] [ref=e195]
+      - paragraph [ref=e196]: 探索的脉络，烈焰的归属
+    - generic [ref=e198]:
+      - button "🌿 野火 (0)" [ref=e199] [cursor=pointer]
+      - button "🏕️ 我的草原 (0)" [ref=e200] [cursor=pointer]
+    - main [ref=e201]:
+      - generic [ref=e202]:
+        - button "✨ 创建新烈焰 从零开始一个探索" [ref=e203] [cursor=pointer]:
+          - generic [ref=e204]:
+            - generic [ref=e205]:
+              - generic [ref=e206]: ✨
+              - generic [ref=e207]:
+                - paragraph [ref=e208]: 创建新烈焰
+                - paragraph [ref=e209]: 从零开始一个探索
+            - img [ref=e210]
+        - generic [ref=e212]:
+          - generic [ref=e213]: 🔥
+          - paragraph [ref=e214]: 还没有野火
+          - paragraph [ref=e215]: 点燃火盆中的火种，或创建新的烈焰
+  - navigation [ref=e216]:
+    - generic [ref=e219]:
+      - link "草原" [ref=e220] [cursor=pointer]:
+        - /url: "#/prairie"
+        - img [ref=e223]
+        - generic [ref=e226]: 草原
+      - link "火盆" [ref=e227] [cursor=pointer]:
+        - /url: "#/hearth"
+        - img [ref=e229]
+        - generic [ref=e231]: 火盆
+      - link "探索" [ref=e232] [cursor=pointer]:
+        - /url: "#/explore"
+        - img [ref=e234]
+        - generic [ref=e237]: 探索
+      - link "设置" [ref=e238] [cursor=pointer]:
+        - /url: "#/settings"
+        - img [ref=e240]
+        - generic [ref=e243]: 设置

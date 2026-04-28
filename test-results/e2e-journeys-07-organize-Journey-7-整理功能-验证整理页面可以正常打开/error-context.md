@@ -14,34 +14,52 @@
 ```
 Error: expect(locator).toBeVisible() failed
 
-Locator: getByRole('heading', { name: '整理' })
+Locator: locator('text=整理')
 Expected: visible
-Timeout: 5000ms
-Error: element(s) not found
+Error: strict mode violation: locator('text=整理') resolved to 3 elements:
+    1) <h1 class="text-2xl font-display font-bold text-text-primary">整理</h1> aka getByRole('heading', { name: '整理' })
+    2) <p class="text-sm text-text-muted">整理散落的探索</p> aka getByText('整理散落的探索')
+    3) <p class="text-text-muted">暂无野火需要整理</p> aka getByText('暂无野火需要整理')
 
 Call log:
   - Expect "toBeVisible" with timeout 5000ms
-  - waiting for getByRole('heading', { name: '整理' })
+  - waiting for locator('text=整理')
 
 ```
 
 # Page snapshot
 
 ```yaml
-- generic [ref=e3]:
-  - generic [ref=e4]: "[plugin:vite:esbuild] Transform failed with 1 error: D:/dev/Ignite/src/stores/flameStore.ts:27:2: ERROR: Unexpected \"<<\""
-  - generic [ref=e5]: D:/dev/Ignite/src/stores/flameStore.ts:27:2
-  - generic [ref=e6]: "Unexpected \"<<\" 25 | try { 26 | const flames = await db.flames 27 | <<<<<<< HEAD | ^ 28 | .filter(flame => (flame.prairieId === null || flame.prairieId === undefined) && !flame.isDeleted) 29 | ======="
-  - generic [ref=e7]: at failureErrorWithLog (D:\dev\Ignite\node_modules\vite\node_modules\esbuild\lib\main.js:1748:15) at D:\dev\Ignite\node_modules\vite\node_modules\esbuild\lib\main.js:1017:50 at responseCallbacks.<computed> (D:\dev\Ignite\node_modules\vite\node_modules\esbuild\lib\main.js:884:9) at handleIncomingPacket (D:\dev\Ignite\node_modules\vite\node_modules\esbuild\lib\main.js:939:12) at Socket.readFromStdout (D:\dev\Ignite\node_modules\vite\node_modules\esbuild\lib\main.js:862:7) at Socket.emit (node:events:508:20) at Socket.emit (node:domain:489:12) at addChunk (node:internal/streams/readable:564:12) at readableAddChunkPushByteMode (node:internal/streams/readable:515:3) at Readable.push (node:internal/streams/readable:395:5) at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
-  - generic [ref=e8]:
-    - text: Click outside, press Esc key, or fix the code to dismiss.
-    - text: You can also disable this overlay by setting
-    - code [ref=e9]: server.hmr.overlay
-    - text: to
-    - code [ref=e10]: "false"
-    - text: in
-    - code [ref=e11]: vite.config.ts
-    - text: .
+- generic [ref=e5]:
+  - generic [ref=e6]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: 🌿
+        - heading "整理" [level=1] [ref=e10]
+      - paragraph [ref=e11]: 整理散落的探索
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e15]: 🌿
+        - paragraph [ref=e16]: 暂无野火需要整理
+        - paragraph [ref=e17]: 去火盆点燃一些火种吧
+  - navigation [ref=e18]:
+    - generic [ref=e21]:
+      - link "草原" [ref=e22] [cursor=pointer]:
+        - /url: "#/prairie"
+        - img [ref=e24]
+        - generic [ref=e27]: 草原
+      - link "火盆" [ref=e28] [cursor=pointer]:
+        - /url: "#/hearth"
+        - img [ref=e30]
+        - generic [ref=e32]: 火盆
+      - link "探索" [ref=e33] [cursor=pointer]:
+        - /url: "#/explore"
+        - img [ref=e35]
+        - generic [ref=e38]: 探索
+      - link "设置" [ref=e39] [cursor=pointer]:
+        - /url: "#/settings"
+        - img [ref=e41]
+        - generic [ref=e44]: 设置
 ```
 
 # Test source
@@ -64,9 +82,9 @@ Call log:
   15 |     // 2. 验证 URL 正确
   16 |     await expect(page).toHaveURL(/\/organize/);
   17 | 
-  18 |     // 3. 验证页面加载完成（使用更精确的 heading 选择器）
-> 19 |     await expect(page.getByRole('heading', { name: '整理' })).toBeVisible();
-     |                                                             ^ Error: expect(locator).toBeVisible() failed
+  18 |     // 3. 验证页面加载完成（有导航栏）
+> 19 |     await expect(page.locator('text=整理')).toBeVisible();
+     |                                           ^ Error: expect(locator).toBeVisible() failed
   20 |   });
   21 | });
 ```

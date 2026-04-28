@@ -1,0 +1,41 @@
+- generic [ref=e5]:
+  - generic [ref=e6]:
+    - banner [ref=e7]:
+      - generic [ref=e9]: 🔥
+      - heading "火盆" [level=1] [ref=e11]
+      - paragraph [ref=e12]: 写下你的第一个灵感
+    - generic [ref=e16]:
+      - textbox "写下一粒火种，点燃探索的 start..." [ref=e18]
+      - generic [ref=e19]:
+        - generic [ref=e20]: 0/200
+        - button "投入火盆" [disabled] [ref=e21]:
+          - generic [ref=e22]:
+            - img [ref=e23]
+            - text: 投入火盆
+    - main [ref=e25]:
+      - generic [ref=e26]:
+        - generic [ref=e27]: 🌱
+        - paragraph [ref=e28]: 火盆空空如也
+        - paragraph [ref=e29]: 写下你的第一个灵感
+    - contentinfo:
+      - button "思考中..." [disabled] [ref=e30]:
+        - img [ref=e31]
+        - generic [ref=e34]: 思考中...
+  - navigation [ref=e35]:
+    - generic [ref=e38]:
+      - link "草原" [ref=e39] [cursor=pointer]:
+        - /url: "#/prairie"
+        - img [ref=e41]
+        - generic [ref=e44]: 草原
+      - link "火盆" [ref=e45] [cursor=pointer]:
+        - /url: "#/hearth"
+        - img [ref=e48]
+        - generic [ref=e50]: 火盆
+      - link "探索" [ref=e51] [cursor=pointer]:
+        - /url: "#/explore"
+        - img [ref=e53]
+        - generic [ref=e56]: 探索
+      - link "设置" [ref=e57] [cursor=pointer]:
+        - /url: "#/settings"
+        - img [ref=e59]
+        - generic [ref=e62]: 设置

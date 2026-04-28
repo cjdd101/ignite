@@ -8,7 +8,7 @@ import { BottomNav } from '@/components/BottomNav'
 
 export function HearthPage() {
   const { sparks, fetchSparks } = useSparkStore()
-  const { seeds, fetchSeeds, addToSparks, refillBuffer, loading } = useSeedBufferStore()
+  const { seeds, fetchSeeds, addToSparks, triggerBackgroundRefill, loading } = useSeedBufferStore()
 
   useEffect(() => {
     fetchSparks()
@@ -17,12 +17,14 @@ export function HearthPage() {
 
   const handleSwapSeeds = async () => {
     if (seeds.length === 0) {
-      await refillBuffer()
+      // Buffer 为空：触发后台补充（不阻塞），用户可以继续操作
+      triggerBackgroundRefill()
     } else {
+      // Buffer 有种子：立即添加到 sparks（无等待）
       await addToSparks(seeds)
+      await fetchSparks()
+      await fetchSeeds()
     }
-    await fetchSparks()
-    await fetchSeeds()
   }
 
   const sparkCount = sparks.length
