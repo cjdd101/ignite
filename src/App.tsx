@@ -8,31 +8,42 @@ import { RekindlePage } from '@/pages/RekindlePage'
 import { OrganizePage } from '@/pages/OrganizePage'
 import { FlameDetailPage } from '@/pages/FlameDetailPage'
 import { CompleteBurningPage } from '@/pages/CompleteBurningPage'
-import { PageTransition } from '@/components/PageTransition'
 
-function KindleWrapper() {
+// Wrapper for RekindlePage - receives flameId from route params
+function RekindleWrapper() {
   const { flameId } = useParams<{ flameId: string }>()
-  return <KindleWizard sparkId={flameId || ''} />
+  return <RekindlePage flameId={flameId || ''} />
+}
+
+// Wrapper for KindleWizard with sparkId from route
+function KindleFromSparkWrapper() {
+  const { sparkId } = useParams<{ sparkId: string }>()
+  return <KindleWizard sparkId={sparkId || ''} />
+}
+
+// Wrapper for KindleWizard with prairieId from route
+function KindleFromPrairieWrapper() {
+  const { prairieId } = useParams<{ prairieId: string }>()
+  return <KindleWizard sparkId="" prairieId={prairieId} />
 }
 
 function App() {
   return (
-    <div className="min-h-screen bg-bg-base">
-      <PageTransition>
-        <Routes>
-          <Route path="/" element={<Navigate to="/hearth" replace />} />
-          <Route path="/hearth" element={<HearthPage />} />
-          <Route path="/prairie" element={<PrairiePage />} />
-          <Route path="/prairie/flame/create" element={<KindleWizard sparkId="" />} />
-          <Route path="/prairie/flame/:id" element={<FlameDetailPage />} />
-          <Route path="/prairie/flame/:id/complete" element={<CompleteBurningPage />} />
-          <Route path="/prairie/:flameId/kindle" element={<KindleWrapper />} />
-          <Route path="/prairie/:flameId/rekindle" element={<RekindlePage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/organize" element={<OrganizePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
-      </PageTransition>
+    <div className="max-w-app mx-auto">
+      <Routes>
+        <Route path="/" element={<Navigate to="/hearth" replace />} />
+        <Route path="/hearth" element={<HearthPage />} />
+        <Route path="/hearth/kindle/:sparkId" element={<KindleFromSparkWrapper />} />
+        <Route path="/prairie" element={<PrairiePage />} />
+        <Route path="/prairie/flame/create" element={<KindleWizard sparkId="" />} />
+        <Route path="/prairie/:prairieId/flame/create" element={<KindleFromPrairieWrapper />} />
+        <Route path="/prairie/flame/:id" element={<FlameDetailPage />} />
+        <Route path="/prairie/flame/:id/complete" element={<CompleteBurningPage />} />
+        <Route path="/prairie/flame/:id/rekindle" element={<RekindleWrapper />} />
+        <Route path="/explore" element={<ExplorePage />} />
+        <Route path="/organize" element={<OrganizePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Routes>
     </div>
   )
 }

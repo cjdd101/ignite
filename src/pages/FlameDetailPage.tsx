@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'motion/react'
 import { db } from '@/lib/db'
 import { PlatformJumpPanel } from '@/components/PlatformJumpPanel'
 import { BottomNav } from '@/components/BottomNav'
@@ -20,15 +19,8 @@ export function FlameDetailPage() {
 
   if (!flame) {
     return (
-      <div className="page flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
-          <div className="text-4xl mb-4">🔥</div>
-          <p className="text-text-muted">烈焰不存在</p>
-        </motion.div>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">加载中...</p>
       </div>
     )
   }
@@ -49,101 +41,55 @@ export function FlameDetailPage() {
   }
 
   return (
-    <div className="page">
-      {/* 背景装饰 */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 right-1/4 w-64 h-64 rounded-full bg-fire-flame/5 blur-[100px]" />
-      </div>
+    <div className="min-h-screen pb-20">
+      <header className="p-4 border-b border-gray-700">
+        <h1 className="text-2xl font-bold text-fire-flame">烈焰详情</h1>
+      </header>
 
-      <div className="relative z-10">
-        {/* 头部 */}
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="page-header"
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-2xl">🔥</span>
-            <h1 className="text-2xl font-display font-bold text-text-primary">烈焰详情</h1>
-          </div>
-          <p className="text-sm text-text-muted">探索进度</p>
-        </motion.header>
-
-        <main className="px-4 max-w-lg mx-auto">
-          {/* 烈焰信息卡片 */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card card-flame p-4 mb-4"
-          >
-            <h2 className="text-xl font-display font-bold text-text-primary mb-2">{flame.title}</h2>
-            {flame.description && (
-              <p className="text-text-secondary mb-2">{flame.description}</p>
-            )}
-            {flame.recommendationReason && (
-              <p className="text-sm text-text-muted mt-2">{flame.recommendationReason}</p>
-            )}
-            <div className="mt-4 flex items-center gap-2">
-              <span className={`px-2 py-1 rounded text-sm ${
-                flame.status === 'burning'
-                  ? 'bg-fire-flame/20 text-fire-flame'
-                  : 'bg-gray-700 text-gray-400'
-              }`}>
-                {flame.status === 'burning' ? '燃烧中' : '已燃尽'}
+      <main className="p-4">
+        <div className="bg-bg-card rounded-lg p-4 mb-4">
+          <h2 className="text-xl font-bold text-white mb-2">{flame.title}</h2>
+          {flame.description && (
+            <p className="text-gray-400 mb-2">{flame.description}</p>
+          )}
+          {flame.recommendationReason && (
+            <p className="text-sm text-gray-500 mt-2">{flame.recommendationReason}</p>
+          )}
+          <div className="mt-4 flex items-center gap-2">
+            <span className={`px-2 py-1 rounded text-sm ${
+              flame.status === 'burning'
+                ? 'bg-fire-flame/20 text-fire-flame'
+                : 'bg-gray-700 text-gray-400'
+            }`}>
+              {flame.status === 'burning' ? '燃烧中' : '已燃尽'}
+            </span>
+            {flame.rekindleCount > 0 && (
+              <span className="text-sm text-gray-500">
+                已取火 {flame.rekindleCount} 次
               </span>
-              {flame.rekindleCount > 0 && (
-                <span className="text-sm text-text-muted">
-                  已取火 {flame.rekindleCount} 次
-                </span>
-              )}
-            </div>
-          </motion.div>
+            )}
+          </div>
+        </div>
 
-          {/* 操作按钮 */}
-          {flame.status === 'burning' && (
-            <div className="space-y-3">
-              {flame.searchPhrase && (
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleJump}
-                  className="w-full py-3 bg-bg-elevated border border-white/10 rounded-xl text-text-primary font-medium hover:bg-white/5 transition-colors"
-                >
-                  跳转平台
-                </motion.button>
-              )}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleComplete}
-                className="w-full py-3 bg-gradient-to-r from-fire-flame to-fire-wildfire text-white rounded-xl font-medium"
+        {flame.status === 'burning' && (
+          <div className="space-y-3">
+            {flame.searchPhrase && (
+              <button
+                onClick={handleJump}
+                className="w-full py-3 bg-fire-spark text-white rounded-lg font-medium"
               >
-                完成燃烧
-              </motion.button>
-            </div>
-          )}
-
-          {/* 取火按钮 */}
-          {flame.status === 'burned' && (
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(`/prairie/${flame.id}/rekindle`)}
-              className="w-full py-3 bg-gradient-to-r from-fire-spark to-fire-ember text-white rounded-xl font-medium"
+                跳转平台
+              </button>
+            )}
+            <button
+              onClick={handleComplete}
+              className="w-full py-3 bg-fire-flame text-white rounded-lg font-medium"
             >
-              取火
-            </motion.button>
-          )}
-        </main>
-      </div>
+              完成燃烧
+            </button>
+          </div>
+        )}
+      </main>
 
       <BottomNav />
 

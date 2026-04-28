@@ -24,6 +24,11 @@ export const useSeedBufferStore = create<SeedBufferState>((set, get) => ({
         .filter(seed => !seed.used)
         .toArray()
       set({ seeds, loading: false })
+
+      // Auto-refill if below 10
+      if (seeds.length < 10) {
+        get().refillBuffer()
+      }
     } catch (error) {
       set({ loading: false })
     }

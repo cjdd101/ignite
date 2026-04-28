@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { PLATFORM_URLS, buildSearchUrl } from '@/lib/platforms'
+import { PLATFORM_WEB_URLS, buildSearchUrl } from '@/lib/platforms'
 
 describe('platforms', () => {
   it('should have all required platform URLs', () => {

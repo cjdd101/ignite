@@ -24,7 +24,7 @@ export const useFlameStore = create<FlameState>((set, get) => ({
     set({ loading: true, error: null })
     try {
       const flames = await db.flames
-        .filter(flame => (flame.prairieId === null || flame.prairieId === undefined) && !flame.isDeleted)
+        .filter(flame => !flame.prairieId && !flame.isDeleted)
         .sortBy('createdAt')
       set({ wildFlames: flames.reverse(), loading: false })
     } catch (error) {
