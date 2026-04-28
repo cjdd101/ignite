@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { db, generateId } from '@/lib/db'
 import { useFlameStore } from '@/stores/flameStore'
 import { usePrairieStore } from '@/stores/prairieStore'
 import { api } from '@/lib/api'
-import { PlatformJumpPanel } from '@/components/PlatformJumpPanel'
+import { PerspectiveCard } from '@/components/PerspectiveCard'
 import type { Spark } from '@/types'
 
 type Step = 'perspective' | 'action' | 'confirm'
@@ -41,8 +42,6 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
   // Step 3: Confirm
   const [selectedPrairieId, setSelectedPrairieId] = useState<string | null>(null)
   const [newPrairieName, setNewPrairieName] = useState<string | null>(null)
-  const [showPlatformPanel, setShowPlatformPanel] = useState(false)
-  const [createdSearchPhrases, setCreatedSearchPhrases] = useState<string[]>([])
 
   useEffect(() => {
     loadSpark()
@@ -129,7 +128,7 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
 
     setLoading(true)
     const igniteBatchId = generateId()
-    const searchPhrases: string[] = []
+    const createdFlames: { id: string; title: string; searchPhrase: string }[] = []
 
     let targetPrairieId = selectedPrairieId
     if (newPrairieName && !selectedPrairieId) {
@@ -159,236 +158,320 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
         isDeleted: false,
         rekindleCount: 0,
       })
-      searchPhrases.push(actionInputs[index]?.searchPhrase || perspectives[index]?.searchPhrase || '')
+      createdFlames.push({
+        id: flame.id,
+        title: flameTitles[index],
+        searchPhrase: actionInputs[index]?.searchPhrase || perspectives[index]?.searchPhrase || ''
+      })
     }
 
-    if (searchPhrases[0]) {
-      await navigator.clipboard.writeText(searchPhrases[0])
-    }
+    // 保存创建的火焰信息，用于跳转后提示
+    sessionStorage.setItem('justCreatedFlames', JSON.stringify(createdFlames))
 
-    setCreatedSearchPhrases(searchPhrases)
-    setShowPlatformPanel(true)
     setLoading(false)
+
+    // 直接导航到草原页，不弹窗
+    navigate('/prairie')
   }
 
-  const handleClosePlatformPanel = () => {
-    setShowPlatformPanel(false)
-    navigate('/prairie')
+  const stepLabels: Record<Step, string> = {
+    perspective: '选择探索视角',
+    action: '确认行动',
+    confirm: '确认点燃',
   }
 
   if (!spark) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">火种不存在</p>
+      <div className="page flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <div className="text-4xl mb-4">🔥</div>
+          <p className="text-text-muted">火种不存在</p>
+        </motion.div>
       </div>
     )
   }
 
-  const stepLabels: Record<Step, string> = {
-    perspective: '第1步: 选择探索视角',
-    action: '第2步: 确认行动',
-    confirm: '第3步: 确认点燃',
-  }
-
   return (
-    <div className="min-h-screen pb-20">
-      <header className="p-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-fire-spark">点燃向导</h1>
-        <p className="text-sm text-gray-400">{stepLabels[step]}</p>
-      </header>
+    <div className="page">
+      {/* 背景 */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-1/4 w-64 h-64 rounded-full bg-fire-spark/5 blur-[100px]" />
+      </div>
 
-      <main className="p-4">
-        <section className="mb-6">
-          <h2 className="text-sm text-gray-400 mb-2">火种内容</h2>
-          <div className="bg-bg-card rounded-lg p-4">
-            <p className="text-white">{spark.content}</p>
+      <div className="relative z-10">
+        {/* 头部 */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="page-header"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-2xl">✨</span>
+            <h1 className="text-2xl font-display font-bold text-text-primary">点燃向导</h1>
           </div>
-        </section>
+          <p className="text-sm text-text-muted">{stepLabels[step]}</p>
+        </motion.header>
 
-        {step === 'perspective' && (
-          <section>
-            {perspectives.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-400 mb-4">点击按钮获取 AI 生成的探索视角建议</p>
-                <button
-                  onClick={handleLoadPerspectives}
-                  disabled={loading}
-                  className="bg-fire-spark text-white px-6 py-2 rounded-lg disabled:opacity-50"
-                >
-                  {loading ? '加载中...' : '获取探索视角'}
-                </button>
-                {error && <p className="text-red-400 mt-2">{error}</p>}
-              </div>
-            ) : (
-              <>
-                <h2 className="text-lg font-medium mb-4">选择探索视角（可多选）</h2>
-                <div className="space-y-3">
-                  {perspectives.map((p, index) => (
-                    <button
-                      key={index}
-                      onClick={() => togglePerspective(index)}
-                      className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                        selectedIndices.includes(index)
-                          ? 'border-fire-spark bg-fire-spark/10'
-                          : 'border-gray-700 hover:border-gray-500'
-                      }`}
+        {/* 步骤指示器 */}
+        <div className="px-4 max-w-lg mx-auto mb-6">
+          <div className="flex gap-2">
+            {(['perspective', 'action', 'confirm'] as Step[]).map((s, i) => (
+              <div
+                key={s}
+                className={`flex-1 h-1 rounded-full transition-colors ${
+                  step === s ? 'bg-fire-spark' : i < ['perspective', 'action', 'confirm'].indexOf(step) ? 'bg-fire-spark/50' : 'bg-white/10'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 火种内容 */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="px-4 max-w-lg mx-auto mb-6"
+        >
+          <p className="text-xs text-text-muted uppercase tracking-wider mb-2">火种内容</p>
+          <div className="card card-spark p-4">
+            <p className="text-text-primary leading-relaxed">{spark.content}</p>
+          </div>
+        </motion.div>
+
+        <main className="px-4 max-w-lg mx-auto">
+          <AnimatePresence mode="wait">
+            {/* Step 1: Perspective */}
+            {step === 'perspective' && (
+              <motion.div
+                key="perspective"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                {perspectives.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 rounded-full bg-fire-spark/10 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-3xl">💡</span>
+                    </div>
+                    <p className="text-text-secondary mb-6">点击按钮获取 AI 生成的探索视角建议</p>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleLoadPerspectives}
+                      disabled={loading}
+                      className="btn btn-primary mx-auto"
                     >
-                      <div className="flex items-start gap-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedIndices.includes(index)}
-                          onChange={() => togglePerspective(index)}
-                          className="mt-1 accent-fire-spark"
+                      {loading ? (
+                        <>
+                          <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                          </svg>
+                          加载中...
+                        </>
+                      ) : '获取探索视角'}
+                    </motion.button>
+                    {error && <p className="text-red-400 mt-4 text-sm">{error}</p>}
+                  </div>
+                ) : (
+                  <>
+                    <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">选择探索视角（可多选）</h2>
+                    <div className="space-y-3">
+                      {perspectives.map((p, index) => (
+                        <PerspectiveCard
+                          key={index}
+                          type={p.type}
+                          description={p.description}
+                          firstStep={p.firstStep}
+                          searchPhrase={p.searchPhrase}
+                          selected={selectedIndices.includes(index)}
+                          onSelect={() => togglePerspective(index)}
                         />
+                      ))}
+                    </div>
+
+                    <div className="mt-6 flex gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => navigate(-1)}
+                        className="flex-1 py-3 border border-white/10 rounded-xl text-text-secondary hover:bg-white/5 transition-colors"
+                      >
+                        取消
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleSkipToConfirm}
+                        className="flex-1 py-3 border border-white/10 rounded-xl text-text-secondary hover:bg-white/5 transition-colors"
+                      >
+                        跳过
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleConfirmPerspectives}
+                        disabled={selectedIndices.length === 0}
+                        className={`flex-1 py-3 rounded-xl font-medium transition-all ${
+                          selectedIndices.length > 0
+                            ? 'bg-gradient-to-r from-fire-spark to-fire-ember text-white'
+                            : 'bg-bg-elevated text-text-muted cursor-not-allowed'
+                        }`}
+                      >
+                        下一步
+                      </motion.button>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            )}
+
+            {/* Step 2: Action */}
+            {step === 'action' && (
+              <motion.div
+                key="action"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+              >
+                <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">确认每一步行动</h2>
+                <div className="space-y-4">
+                  {selectedIndices.map((perspectiveIndex, flameIndex) => (
+                    <div key={flameIndex} className="card p-4">
+                      <div className="text-sm text-fire-spark font-medium mb-3">
+                        {perspectives[perspectiveIndex]?.type}
+                      </div>
+                      <div className="space-y-3">
                         <div>
-                          <div className="font-medium text-fire-spark">{p.type}</div>
-                          <div className="text-sm text-gray-400">{p.description}</div>
+                          <label className="block text-xs text-text-muted mb-1.5">烈焰标题</label>
+                          <input
+                            type="text"
+                            value={flameTitles[flameIndex]}
+                            onChange={(e) => updateFlameTitle(flameIndex, e.target.value)}
+                            className="input"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-text-muted mb-1.5">第一步行动</label>
+                          <input
+                            type="text"
+                            value={actionInputs[perspectiveIndex]?.firstStep || ''}
+                            onChange={(e) => updateAction(perspectiveIndex, 'firstStep', e.target.value)}
+                            className="input"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-text-muted mb-1.5">探索口令</label>
+                          <input
+                            type="text"
+                            value={actionInputs[perspectiveIndex]?.searchPhrase || ''}
+                            onChange={(e) => updateAction(perspectiveIndex, 'searchPhrase', e.target.value)}
+                            className="input"
+                          />
                         </div>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
 
                 <div className="mt-6 flex gap-3">
-                  <button onClick={() => navigate(-1)} className="flex-1 py-2 border border-gray-600 rounded">
-                    取消
-                  </button>
-                  <button onClick={handleSkipToConfirm} className="flex-1 py-2 border border-gray-600 rounded">
-                    跳过，直接创建
-                  </button>
-                  <button
-                    onClick={handleConfirmPerspectives}
-                    disabled={selectedIndices.length === 0}
-                    className={`flex-1 py-2 rounded ${
-                      selectedIndices.length > 0
-                        ? 'bg-fire-spark text-white'
-                        : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                    }`}
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setStep('perspective')}
+                    className="flex-1 py-3 border border-white/10 rounded-xl text-text-secondary hover:bg-white/5 transition-colors"
+                  >
+                    上一步
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleConfirmActions}
+                    className="flex-1 py-3 bg-gradient-to-r from-fire-spark to-fire-ember rounded-xl text-white font-medium"
                   >
                     下一步
-                  </button>
+                  </motion.button>
                 </div>
-              </>
+              </motion.div>
             )}
-          </section>
-        )}
 
-        {step === 'action' && (
-          <section>
-            <h2 className="text-lg font-medium mb-4">确认每一步行动</h2>
-            <div className="space-y-4">
-              {selectedIndices.map((perspectiveIndex, flameIndex) => (
-                <div key={flameIndex} className="bg-bg-card rounded-lg p-4">
-                  <div className="text-sm text-fire-spark mb-2">
-                    {perspectives[perspectiveIndex]?.type}
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs text-gray-400 mb-1">烈焰标题</label>
-                      <input
-                        type="text"
-                        value={flameTitles[flameIndex]}
-                        onChange={(e) => updateFlameTitle(flameIndex, e.target.value)}
-                        className="w-full bg-bg-secondary border border-gray-700 rounded px-3 py-2 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-400 mb-1">第一步行动</label>
-                      <input
-                        type="text"
-                        value={actionInputs[perspectiveIndex]?.firstStep || ''}
-                        onChange={(e) => updateAction(perspectiveIndex, 'firstStep', e.target.value)}
-                        className="w-full bg-bg-secondary border border-gray-700 rounded px-3 py-2 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-400 mb-1">探索口令</label>
-                      <input
-                        type="text"
-                        value={actionInputs[perspectiveIndex]?.searchPhrase || ''}
-                        onChange={(e) => updateAction(perspectiveIndex, 'searchPhrase', e.target.value)}
-                        className="w-full bg-bg-secondary border border-gray-700 rounded px-3 py-2 text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button onClick={() => setStep('perspective')} className="flex-1 py-2 border border-gray-600 rounded">
-                上一步
-              </button>
-              <button onClick={handleConfirmActions} className="flex-1 py-2 bg-fire-spark text-white rounded">
-                下一步
-              </button>
-            </div>
-          </section>
-        )}
-
-        {step === 'confirm' && (
-          <section>
-            <h2 className="text-lg font-medium mb-4">确认点燃 {selectedIndices.length} 团烈焰</h2>
-
-            <div className="space-y-3 mb-4">
-              {selectedIndices.map((perspectiveIndex, flameIndex) => (
-                <div key={flameIndex} className="bg-bg-card rounded-lg p-3">
-                  <div className="font-medium text-fire-flame">{flameTitles[flameIndex]}</div>
-                  <div className="text-sm text-gray-400">
-                    探索口令: {actionInputs[perspectiveIndex]?.searchPhrase}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm text-gray-400 mb-1">归入草原（可选）</label>
-              <select
-                value={selectedPrairieId || ''}
-                onChange={(e) => {
-                  setSelectedPrairieId(e.target.value || null)
-                  setNewPrairieName(null)
-                }}
-                className="w-full bg-bg-card border border-gray-700 rounded px-3 py-2 text-white"
+            {/* Step 3: Confirm */}
+            {step === 'confirm' && (
+              <motion.div
+                key="confirm"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
               >
-                <option value="">不归类（野火）</option>
-                {prairies.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-              {!selectedPrairieId && (
-                <input
-                  type="text"
-                  value={newPrairieName || ''}
-                  onChange={(e) => setNewPrairieName(e.target.value || null)}
-                  placeholder="或输入新草原名称"
-                  className="w-full mt-2 bg-bg-card border border-gray-700 rounded px-3 py-2 text-white placeholder-gray-500"
-                />
-              )}
-            </div>
+                <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">
+                  确认点燃 {selectedIndices.length} 团烈焰
+                </h2>
 
-            <div className="flex gap-3">
-              <button onClick={() => setStep('action')} className="flex-1 py-2 border border-gray-600 rounded">
-                上一步
-              </button>
-              <button
-                onClick={handleCreateFlames}
-                disabled={loading}
-                className="flex-1 py-2 bg-fire-flame text-white rounded disabled:opacity-50"
-              >
-                {loading ? '创建中...' : '确认点燃'}
-              </button>
-            </div>
-          </section>
-        )}
-      </main>
+                <div className="space-y-3 mb-6">
+                  {selectedIndices.map((perspectiveIndex, flameIndex) => (
+                    <div key={flameIndex} className="card card-flame p-4">
+                      <div className="font-medium text-text-primary">{flameTitles[flameIndex]}</div>
+                      <div className="text-sm text-text-muted mt-1">
+                        探索口令: {actionInputs[perspectiveIndex]?.searchPhrase}
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-      {showPlatformPanel && createdSearchPhrases[0] && (
-        <PlatformJumpPanel
-          searchPhrase={createdSearchPhrases[0]}
-          onClose={handleClosePlatformPanel}
-        />
-      )}
+                <div className="mb-6">
+                  <label className="block text-xs text-text-muted mb-2">归入草原（可选）</label>
+                  <select
+                    value={selectedPrairieId || ''}
+                    onChange={(e) => {
+                      setSelectedPrairieId(e.target.value || null)
+                      setNewPrairieName(null)
+                    }}
+                    className="input"
+                  >
+                    <option value="">不归类（野火）</option>
+                    {prairies.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                  {!selectedPrairieId && (
+                    <input
+                      type="text"
+                      value={newPrairieName || ''}
+                      onChange={(e) => setNewPrairieName(e.target.value || null)}
+                      placeholder="或输入新草原名称"
+                      className="input mt-2"
+                    />
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setStep('action')}
+                    className="flex-1 py-3 border border-white/10 rounded-xl text-text-secondary hover:bg-white/5 transition-colors"
+                  >
+                    上一步
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCreateFlames}
+                    disabled={loading}
+                    className="flex-1 py-3 bg-gradient-to-r from-fire-flame to-fire-wildfire rounded-xl text-white font-medium disabled:opacity-50"
+                  >
+                    {loading ? '创建中...' : '确认点燃'}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   )
 }

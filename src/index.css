@@ -1,6 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* 背景 */
+  --bg-base: #0D0D0F;
+  --bg-primary: #141418;
+  --bg-secondary: #1C1C22;
+  --bg-card: #222228;
+  --bg-elevated: #2A2A32;
+
+  /* 火系 */
+  --fire-spark: #FFD93D;
+  --fire-flame: #FF6B35;
+  --fire-wildfire: #E84A2F;
+  --fire-ember: #FF8C42;
+  --fire-coal: #C73E1D;
+
+  /* 草原 */
+  --prairie-light: #4ADE80;
+  --prairie-primary: #22C55E;
+  --prairie-dark: #16A34A;
+  --prairie-muted: #86EFAC;
+
+  /* 文字 - 确保对比度 */
+  --text-primary: #FFFFFF;
+  --text-secondary: #C9C9D2;
+  --text-muted: #8888A0;
+  --text-fire: #FFD93D;
+  --text-inverse: #0D0D0F;
+}
 
 * {
   margin: 0;
@@ -8,10 +39,325 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #1a1a1a;
-  color: #ffffff;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 背景纹理 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 107, 53, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(34, 197, 94, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 0% 80%, rgba(255, 217, 61, 0.03) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 噪声纹理叠加 */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* 字体 */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 选中文字 */
+::selection {
+  background: rgba(255, 107, 53, 0.3);
+  color: var(--text-primary);
+}
+
+/* 焦点状态 */
+:focus-visible {
+  outline: 2px solid var(--fire-flame);
+  outline-offset: 2px;
+}
+
+/* 卡片基础样式 */
+@layer components {
+  .card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card:hover {
+    background: var(--bg-elevated);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  /* 火种卡片 - 金色光晕 */
+  .card-spark {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-spark::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fire-spark), transparent);
+    opacity: 0.6;
+  }
+
+  .card-spark:hover {
+    box-shadow: 0 0 30px rgba(255, 217, 61, 0.15);
+  }
+
+  /* 烈焰卡片 - 橙色光晕 */
+  .card-flame {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-flame::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fire-flame), transparent);
+    opacity: 0.6;
+  }
+
+  .card-flame:hover {
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.2);
+  }
+
+  /* 草原卡片 - 绿色光晕 */
+  .card-prairie {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-prairie::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--prairie-primary), transparent);
+    opacity: 0.6;
+  }
+
+  .card-prairie:hover {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.15);
+  }
+
+  /* 按钮基础 */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--fire-flame), var(--fire-wildfire));
+    color: white;
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 6px 30px rgba(255, 107, 53, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-card);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* 输入框 */
+  .input {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+    padding: 0.875rem 1rem;
+    color: var(--text-primary);
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--fire-flame);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+  }
+
+  /* 页面容器 */
+  .page {
+    min-height: 100vh;
+    padding-bottom: 5rem;
+  }
+
+  /* 页面标题区 */
+  .page-header {
+    padding: 1.5rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* 列表项 */
+  .list-item {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 1rem;
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .list-item:hover {
+    background: var(--bg-elevated);
+    transform: translateX(4px);
+  }
+}
+
+/* 动画类 */
+@layer utilities {
+  .animate-entrance {
+    animation: entrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-stagger > * {
+    opacity: 0;
+    animation: entrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .animate-stagger > *:nth-child(2) { animation-delay: 80ms; }
+  .animate-stagger > *:nth-child(3) { animation-delay: 160ms; }
+  .animate-stagger > *:nth-child(4) { animation-delay: 240ms; }
+  .animate-stagger > *:nth-child(5) { animation-delay: 320ms; }
+  .animate-stagger > *:nth-child(6) { animation-delay: 400ms; }
+  .animate-stagger > *:nth-child(7) { animation-delay: 480ms; }
+  .animate-stagger > *:nth-child(8) { animation-delay: 560ms; }
+}
+
+@keyframes entrance {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 呼吸动画 - 用于火种卡片 */
+@keyframes breathe {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 217, 61, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 217, 61, 0.2);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* 火焰闪烁 */
+@keyframes flame-flicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  25% { opacity: 0.9; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+  75% { opacity: 0.95; transform: scale(0.99); }
+}
+
+.animate-flame-flicker {
+  animation: flame-flicker 3s ease-in-out infinite;
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useFlameStore } from '@/stores/flameStore'
 import { useSparkStore } from '@/stores/sparkStore'
@@ -55,7 +56,12 @@ export function RekindlePage() {
     setError(null)
 
     try {
-      const response = await api.rekindle({ reflection: reflection.trim() })
+      const response = await api.rekindle({
+        taskTitle: '反思与重新点燃',
+        taskDescription: '',
+        userRecord: reflection.trim(),
+        sourcePrairie: ''
+      })
       setSparks(response.sparks.map((s: { content: string; type: string }) => ({
         ...s,
         retained: false,
@@ -99,90 +105,141 @@ export function RekindlePage() {
   const canRekindle = reflection.trim().length > 0 && cooldownRemaining === 0 && !loading && !atLimit
 
   return (
-    <div className="min-h-screen pb-20">
-      <header className="p-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-fire-flame">重新点燃</h1>
-        <p className="text-sm text-gray-400">
-          {step === 'reflect' ? '第1步: 写下反思' : '第2步: 选择火种'}
-        </p>
-      </header>
+    <div className="page">
+      {/* 背景 */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 left-1/4 w-64 h-64 rounded-full bg-fire-flame/5 blur-[100px]" />
+      </div>
 
-      <main className="p-4">
-        {step === 'reflect' && (
-          <section>
-            <div className="mb-4">
-              <label className="block text-sm text-gray-400 mb-1">写下你的反思</label>
-              <textarea
-                value={reflection}
-                onChange={(e) => setReflection(e.target.value)}
-                placeholder="写下你的反思..."
-                rows={6}
-                className="w-full bg-bg-card border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:border-fire-flame focus:outline-none resize-none"
-              />
-            </div>
+      <div className="relative z-10">
+        {/* 头部 */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="page-header"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-2xl">🔥</span>
+            <h1 className="text-2xl font-display font-bold text-text-primary">重新点燃</h1>
+          </div>
+          <p className="text-sm text-text-muted">
+            {step === 'reflect' ? '写下你的反思' : '选择要保留的火种'}
+          </p>
+        </motion.header>
 
-            {cooldownRemaining > 0 && (
-              <div className="mb-4 p-3 bg-orange-900/30 border border-orange-500 rounded-lg">
-                <p className="text-orange-400 text-center">
-                  请等待 {cooldownRemaining}s 后再试
-                </p>
-              </div>
+        <main className="px-4 max-w-lg mx-auto pb-8">
+          <AnimatePresence mode="wait">
+            {step === 'reflect' && (
+              <motion.section
+                key="reflect"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <div className="mb-6">
+                  <label className="block text-xs text-text-muted uppercase tracking-wider mb-2">写下你的反思</label>
+                  <textarea
+                    value={reflection}
+                    onChange={(e) => setReflection(e.target.value)}
+                    placeholder="这次探索给你带来了什么感悟..."
+                    rows={6}
+                    className="input resize-none"
+                  />
+                </div>
+
+                {cooldownRemaining > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 p-4 bg-fire-ember/10 border border-fire-ember/30 rounded-xl"
+                  >
+                    <p className="text-fire-ember text-center text-sm">
+                      请等待 {cooldownRemaining}s 后再试
+                    </p>
+                  </motion.div>
+                )}
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
+                  >
+                    <p className="text-red-400 text-center text-sm">{error}</p>
+                  </motion.div>
+                )}
+
+                <motion.button
+                  whileHover={{ scale: canRekindle ? 1.02 : 1 }}
+                  whileTap={{ scale: canRekindle ? 0.98 : 1 }}
+                  onClick={handleRekindle}
+                  disabled={!canRekindle}
+                  className={`w-full py-4 rounded-xl font-medium transition-all ${
+                    canRekindle
+                      ? 'bg-gradient-to-r from-fire-flame to-fire-wildfire text-white shadow-lg'
+                      : 'bg-bg-elevated text-text-muted cursor-not-allowed'
+                  }`}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                      </svg>
+                      重新点燃中...
+                    </span>
+                  ) : '重新点燃'}
+                </motion.button>
+              </motion.section>
             )}
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-900/30 border border-red-500 rounded-lg">
-                <p className="text-red-400 text-center">{error}</p>
-              </div>
+            {step === 'review' && (
+              <motion.section
+                key="review"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+              >
+                <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">
+                  AI 重新点燃的火种
+                </h2>
+
+                <div className="space-y-3 mb-6">
+                  {sparks.map((spark, index) => (
+                    <RekindleSparkCard
+                      key={index}
+                      content={spark.content}
+                      onRetain={() => handleRetain(index)}
+                      onDiscard={() => handleDiscard(index)}
+                      retained={spark.retained}
+                      discarded={spark.discarded}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleBack}
+                    className="flex-1 py-3 border border-white/10 rounded-xl text-text-secondary hover:bg-white/5 transition-colors"
+                  >
+                    上一步
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSave}
+                    className="flex-1 py-3 bg-gradient-to-r from-fire-spark to-fire-ember rounded-xl text-text-inverse font-medium"
+                  >
+                    保存火种
+                  </motion.button>
+                </div>
+              </motion.section>
             )}
-
-            <button
-              onClick={handleRekindle}
-              disabled={!canRekindle}
-              className={`w-full py-3 rounded-lg ${
-                canRekindle
-                  ? 'bg-fire-flame text-white'
-                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              {loading ? '重新点燃中...' : '重新点燃'}
-            </button>
-          </section>
-        )}
-
-        {step === 'review' && (
-          <section>
-            <h2 className="text-lg font-medium mb-4">AI 重新点燃的火种</h2>
-
-            <div className="space-y-3">
-              {sparks.map((spark, index) => (
-                <RekindleSparkCard
-                  key={index}
-                  content={spark.content}
-                  onRetain={() => handleRetain(index)}
-                  onDiscard={() => handleDiscard(index)}
-                  retained={spark.retained}
-                  discarded={spark.discarded}
-                />
-              ))}
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={handleBack}
-                className="flex-1 py-2 border border-gray-600 rounded"
-              >
-                上一步
-              </button>
-              <button
-                onClick={handleSave}
-                className="flex-1 py-2 bg-fire-flame text-white rounded"
-              >
-                保存火种
-              </button>
-            </div>
-          </section>
-        )}
-      </main>
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   )
 }

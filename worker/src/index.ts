@@ -2,8 +2,8 @@ interface Env {
   MINIMAX_API_KEY: string
 }
 
-const MINIMAX_API = 'https://api.minimax.chat/v1/text/chatcompletions_v2'
-const MODEL = 'MiniMax-Text-01'
+const API_RELAY = 'https://api.deepseek.com'
+const MODEL = 'deepseek-v4-flash'
 
 async function handleIgnite(body: { sparkContent: string; existingPrairies: string[] }, env: Env) {
   const prompt = `用户有一个想法或问题，想把它变成具体的探索行动。请按以下三步帮助用户：
@@ -105,7 +105,7 @@ async function handleSeedBuffer(body: { recentSparks: string[]; existingPrairies
 }
 
 async function callMiniMax(prompt: string, env: Env): Promise<Response> {
-  const response = await fetch(MINIMAX_API, {
+  const response = await fetch(`${API_RELAY}/v1/chat/completions`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${env.MINIMAX_API_KEY}`,
@@ -119,8 +119,9 @@ async function callMiniMax(prompt: string, env: Env): Promise<Response> {
     }),
   })
 
-  const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
-  const content = data.choices?.[0]?.message?.content?.replace(/```json|```/g, '').trim() || '{}'
+  const data = await response.json() as { choices?: Array<{ message?: { content?: string; reasoning_content?: string } }> }
+  const rawContent = data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning_content || '{}'
+  const content = rawContent.replace(/```json|```/g, '').trim()
 
   return new Response(content, {
     headers: { 'Content-Type': 'application/json' },

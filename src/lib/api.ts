@@ -1,4 +1,4 @@
-const API_BASE = '/api'
+const API_BASE = 'https://ignite-worker.13261056632.workers.dev/api'
 
 export interface IgniteRequest {
   sparkContent: string

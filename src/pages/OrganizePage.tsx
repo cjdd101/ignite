@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { db } from '@/lib/db'
 import { useFlameStore } from '@/stores/flameStore'
@@ -23,7 +24,6 @@ export function OrganizePage() {
   }
 
   const handleAssignToPrairie = async (prairieId: string) => {
-    // Assign all wild flames to the selected prairie
     for (const flame of wildFlames) {
       await db.flames.update(flame.id, { prairieId })
     }
@@ -37,40 +37,53 @@ export function OrganizePage() {
 
   if (isOrganizing) {
     return (
-      <div className="min-h-screen pb-20">
-        <header className="p-4 border-b border-gray-700">
-          <h1 className="text-2xl font-bold text-fire-prairie">整理</h1>
-          <p className="text-sm text-gray-400">为野火选择草原</p>
-        </header>
+      <div className="page">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-20 right-1/4 w-64 h-64 rounded-full bg-prairie-primary/5 blur-[100px]" />
+        </div>
 
-        <main className="p-4">
-          <section>
-            <h2 className="text-lg font-medium mb-4">选择目标草原</h2>
+        <div className="relative z-10">
+          <motion.header
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="page-header"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">🌿</span>
+              <h1 className="text-2xl font-display font-bold text-text-primary">整理</h1>
+            </div>
+            <p className="text-sm text-text-muted">为野火选择草原</p>
+          </motion.header>
+
+          <main className="px-4 max-w-lg mx-auto pb-8">
+            <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">选择目标草原</h2>
             <div className="space-y-3">
               {prairies.map((prairie) => (
-                <button
+                <motion.button
                   key={prairie.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => handleAssignToPrairie(prairie.id)}
-                  className="w-full bg-bg-card hover:bg-bg-secondary border border-gray-700 rounded-lg p-4 text-left transition-colors"
+                  className="w-full card card-prairie p-4 text-left"
                 >
-                  <h3 className="font-medium text-fire-prairie">{prairie.name}</h3>
+                  <h3 className="font-medium text-prairie-light">{prairie.name}</h3>
                   {prairie.description && (
-                    <p className="text-sm text-gray-400 mt-1">{prairie.description}</p>
+                    <p className="text-sm text-text-muted mt-1">{prairie.description}</p>
                   )}
-                </button>
+                </motion.button>
               ))}
             </div>
-          </section>
 
-          <div className="mt-6">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleCancel}
-              className="w-full py-2 border border-gray-600 rounded"
+              className="w-full mt-6 py-3 border border-white/10 rounded-xl text-text-secondary hover:bg-white/5 transition-colors"
             >
               取消
-            </button>
-          </div>
-        </main>
+            </motion.button>
+          </main>
+        </div>
 
         <BottomNav />
       </div>
@@ -78,37 +91,63 @@ export function OrganizePage() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
-      <header className="p-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-fire-prairie">整理</h1>
-        <p className="text-sm text-gray-400">整理散落的探索</p>
-      </header>
+    <div className="page">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 right-1/4 w-64 h-64 rounded-full bg-prairie-primary/5 blur-[100px]" />
+      </div>
 
-      <main className="p-4">
-        {wildFlames.length > 0 ? (
-          <section>
-            <div className="bg-bg-card rounded-lg p-6 text-center">
-              <p className="text-3xl mb-2">🌿</p>
-              <p className="text-xl font-medium text-white">{wildFlames.length} 朵野火待整理</p>
-              <p className="text-sm text-gray-400 mt-2">
+      <div className="relative z-10">
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="page-header"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-2xl">🌿</span>
+            <h1 className="text-2xl font-display font-bold text-text-primary">整理</h1>
+          </div>
+          <p className="text-sm text-text-muted">整理散落的探索</p>
+        </motion.header>
+
+        <main className="px-4 max-w-lg mx-auto pb-8">
+          {wildFlames.length > 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card p-6 text-center"
+            >
+              <div className="w-16 h-16 rounded-full bg-prairie-primary/10 flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🌿</span>
+              </div>
+              <p className="text-xl font-display font-semibold text-text-primary">{wildFlames.length} 朵野火待整理</p>
+              <p className="text-sm text-text-secondary mt-2">
                 将这些散落的探索分配到草原，形成叙事脉络
               </p>
-            </div>
 
-            <button
-              onClick={handleStartOrganize}
-              className="w-full mt-6 bg-fire-prairie text-white py-3 rounded-lg font-medium"
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleStartOrganize}
+                className="w-full mt-6 py-3 bg-gradient-to-r from-prairie-primary to-prairie-dark rounded-xl text-white font-medium"
+              >
+                开始整理
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
             >
-              开始整理
-            </button>
-          </section>
-        ) : (
-          <section className="text-center py-12">
-            <p className="text-3xl mb-4">🌿</p>
-            <p className="text-gray-400">暂无野火需要整理</p>
-          </section>
-        )}
-      </main>
+              <div className="w-16 h-16 rounded-full bg-bg-secondary/50 flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🌿</span>
+              </div>
+              <p className="text-text-muted">暂无野火需要整理</p>
+              <p className="text-sm text-text-muted/60 mt-1">去火盆点燃一些火种吧</p>
+            </motion.div>
+          )}
+        </main>
+      </div>
 
       <BottomNav />
     </div>
