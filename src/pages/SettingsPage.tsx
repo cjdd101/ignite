@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'motion/react'
+import { motion } from 'framer-motion'
 import { db } from '@/lib/db'
 import { BottomNav } from '@/components/BottomNav'
 import { createGitHubIssue } from '@/lib/api'

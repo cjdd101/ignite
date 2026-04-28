@@ -39,18 +39,18 @@ describe('RekindlePage', () => {
 
   describe('step 1: reflection', () => {
     it('should render reflection textarea and rekindle button', () => {
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       expect(screen.getByPlaceholderText(/写下你的反思/)).toBeDefined()
       expect(screen.getByRole('button', { name: '重新点燃' })).toBeDefined()
     })
 
     it('should disable rekindle button when reflection is empty', () => {
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       expect(screen.getByRole('button', { name: '重新点燃' })).toBeDisabled()
     })
 
     it('should enable rekindle button when user types reflection', async () => {
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: '今天学到了新东西' } })
       expect(screen.getByRole('button', { name: '重新点燃' })).not.toBeDisabled()
     })
@@ -62,7 +62,7 @@ describe('RekindlePage', () => {
         },
       }))
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
       fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
       expect(screen.getByText('重新点燃中...')).toBeDefined()
@@ -71,7 +71,7 @@ describe('RekindlePage', () => {
     it('should show error message when rekindle fails', async () => {
       mockApi.rekindle = vi.fn().mockRejectedValue(new Error('AI unavailable'))
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
       fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
@@ -90,7 +90,7 @@ describe('RekindlePage', () => {
         ],
       })
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
       fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
@@ -109,7 +109,7 @@ describe('RekindlePage', () => {
         ],
       })
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
       fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
@@ -124,7 +124,7 @@ describe('RekindlePage', () => {
         sparks: [{ content: 'spark1', type: '阅读' }],
       })
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
       fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
@@ -147,7 +147,7 @@ describe('RekindlePage', () => {
         ],
       })
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
       fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
@@ -174,7 +174,7 @@ describe('RekindlePage', () => {
         ],
       })
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
       fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
@@ -199,7 +199,7 @@ describe('RekindlePage', () => {
         ],
       })
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
       fireEvent.click(screen.getByRole('button', { name: '重新点燃' }))
 
@@ -223,7 +223,7 @@ describe('RekindlePage', () => {
         addFlame: mockAddFlame,
       })
 
-      renderWithRouter(<RekindlePage />)
+      renderWithRouter(<RekindlePage flameId="test-flame-id" />)
       fireEvent.change(screen.getByPlaceholderText(/写下你的反思/), { target: { value: 'test' } })
 
       await waitFor(() => {

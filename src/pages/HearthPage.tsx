@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSparkStore } from '@/stores/sparkStore'
 import { useSeedBufferStore } from '@/stores/seedBufferStore'
 import { SparkCard } from '@/components/SparkCard'
@@ -8,7 +8,7 @@ import { BottomNav } from '@/components/BottomNav'
 
 export function HearthPage() {
   const { sparks, fetchSparks } = useSparkStore()
-  const { seeds, fetchSeeds, addToSparks, triggerBackgroundRefill, loading } = useSeedBufferStore()
+  const { seeds, fetchSeeds, addToSparks, refillBuffer, loading } = useSeedBufferStore()
 
   useEffect(() => {
     fetchSparks()
@@ -17,10 +17,10 @@ export function HearthPage() {
 
   const handleSwapSeeds = async () => {
     if (seeds.length === 0) {
-      // Buffer 为空：触发后台补充（不阻塞），用户可以继续操作
-      triggerBackgroundRefill()
+      // Buffer 为空：触发 AI 补充种子
+      await refillBuffer()
     } else {
-      // Buffer 有种子：立即添加到 sparks（无等待）
+      // Buffer 有种子：立即添加到 sparks
       await addToSparks(seeds)
       await fetchSparks()
       await fetchSeeds()
@@ -112,7 +112,7 @@ export function HearthPage() {
               onClick={handleSwapSeeds}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              disabled={seedCount === 0 || loading}
+              disabled={loading}
               className={`
                 pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full
                 text-sm font-medium transition-all duration-200
@@ -120,7 +120,7 @@ export function HearthPage() {
                   ? 'bg-bg-elevated/40 text-text-muted cursor-wait border border-white/5'
                   : seedCount > 0
                   ? 'bg-bg-elevated/80 backdrop-blur-md border border-white/10 text-text-secondary hover:text-fire-spark hover:border-fire-spark/30'
-                  : 'bg-bg-elevated/40 text-text-muted cursor-not-allowed border border-white/5'
+                  : 'bg-bg-elevated/80 backdrop-blur-md border border-white/10 text-text-muted hover:text-fire-spark hover:border-fire-spark/30 cursor-pointer'
                 }
               `}
             >

@@ -31,6 +31,10 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
   const [atLimit, setAtLimit] = useState(false)
   const [rekindleRecords, setRekindleRecords] = useState<RekindleRecord[]>([])
 
+  // Manual spark creation
+  const [manualSpark, setManualSpark] = useState('')
+  const [isCreatingManual, setIsCreatingManual] = useState(false)
+
   useEffect(() => {
     if (flameId) {
       db.flames.get(flameId).then(f => {
@@ -42,6 +46,8 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
               ? Math.ceil((REKINDLE_COOLDOWN - (Date.now() - f.lastRekindleTime)) / 1000)
               : 0
           )
+          // Trigger AI rekindle with flame data directly
+          triggerRekindle(f)
         }
       })
       db.rekindleRecords.where('flameId').equals(flameId).toArray().then(setRekindleRecords)
@@ -57,18 +63,18 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
     }
   }, [cooldownRemaining])
 
-  const handleRekindle = async () => {
-    if (!flame || loading || atLimit || cooldownRemaining > 0) return
+  const triggerRekindle = async (flameData: Flame) => {
+    if (loading || atLimit || cooldownRemaining > 0) return
 
     setLoading(true)
     setError(null)
 
     try {
       const response = await api.rekindle({
-        taskTitle: flame.title,
-        taskDescription: flame.description || '',
-        userRecord: flame.userRecord || '',
-        sourcePrairie: flame.prairieId || '',
+        taskTitle: flameData.title,
+        taskDescription: flameData.description || '',
+        userRecord: flameData.userRecord || '',
+        sourcePrairie: flameData.prairieId || '',
       })
 
       const newSparks = (response.newQuestions || []).map(q => ({
@@ -81,6 +87,20 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
       setError('重新点燃失败，请稍后重试')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Rekindle button click handler
+  const handleRekindle = () => flame && triggerRekindle(flame)
+
+  const handleCreateManualSpark = async () => {
+    if (!manualSpark.trim() || isCreatingManual) return
+    setIsCreatingManual(true)
+    try {
+      await addSpark(manualSpark.trim(), 'user')
+      setManualSpark('')
+    } finally {
+      setIsCreatingManual(false)
     }
   }
 
@@ -124,12 +144,10 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
     navigate('/prairie')
   }
 
-  const canRekindle = cooldownRemaining === 0 && !loading && !atLimit
-
   return (
     <div className="min-h-screen pb-20">
       <header className="p-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-fire-flame">重新点燃</h1>
+        <h1 className="text-2xl font-bold text-fire-flame">取火</h1>
         <p className="text-sm text-gray-400">从燃烧中获得新的灵感</p>
       </header>
 
@@ -143,74 +161,98 @@ export function RekindlePage({ flameId }: RekindlePageProps) {
           </div>
         )}
 
-        {cooldownRemaining > 0 && (
-          <div className="mb-4 p-3 bg-orange-900/30 border border-orange-500 rounded-lg">
-            <p className="text-orange-400 text-center">
-              请等待 {cooldownRemaining}s 后再试
-            </p>
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-900/30 border border-red-500 rounded-lg">
-            <p className="text-red-400 text-center">{error}</p>
-          </div>
-        )}
-
-        {sparks.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-400 mb-4">
-              点击按钮，AI 将根据你的探索生成 3 个新的灵感火种
-            </p>
+        {/* 上区：手动创建火种表单 */}
+        <section className="mb-6">
+          <h3 className="text-sm text-gray-400 mb-2">手动创建火种</h3>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={manualSpark}
+              onChange={e => setManualSpark(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleCreateManualSpark()}
+              placeholder="写下你的灵感..."
+              className="flex-1 bg-bg-card border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-fire-flame"
+            />
             <button
-              onClick={handleRekindle}
-              disabled={!canRekindle}
-              className={`w-full py-3 rounded-lg ${
-                canRekindle
-                  ? 'bg-fire-flame text-white'
-                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-              }`}
+              onClick={handleCreateManualSpark}
+              disabled={isCreatingManual || !manualSpark.trim()}
+              className="px-4 py-2 bg-fire-flame text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? '重新点燃中...' : '重新点燃'}
+              {isCreatingManual ? '...' : '创建'}
             </button>
-            {atLimit && (
-              <p className="text-orange-400 text-sm mt-2">已达取火上限</p>
-            )}
           </div>
-        ) : (
-          <section>
-            <h2 className="text-lg font-medium mb-4">选择保留的火种</h2>
-            <div className="space-y-3">
-              {sparks.map((spark, index) => (
-                <RekindleSparkCard
-                  key={index}
-                  content={spark.content}
-                  onRetain={() => handleRetain(index)}
-                  onDiscard={() => handleDiscard(index)}
-                  retained={spark.retained}
-                  discarded={spark.discarded}
-                />
-              ))}
-            </div>
+        </section>
 
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setSparks([])}
-                className="flex-1 py-2 border border-gray-600 rounded"
-              >
-                重新取火
-              </button>
-              <button
-                onClick={handleSave}
-                className="flex-1 py-2 bg-fire-flame text-white rounded"
-              >
-                保存火种
-              </button>
-            </div>
-          </section>
-        )}
+        {/* 下区：AI 取火 */}
+        <section>
+          <h3 className="text-sm text-gray-400 mb-2">AI 正在帮你取火中...</h3>
 
-        {rekindleRecords.length > 0 && sparks.length === 0 && (
+          {cooldownRemaining > 0 && (
+            <div className="mb-4 p-3 bg-orange-900/30 border border-orange-500 rounded-lg">
+              <p className="text-orange-400 text-center">
+                请等待 {cooldownRemaining}s 后再试
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-900/30 border border-red-500 rounded-lg">
+              <p className="text-red-400 text-center">{error}</p>
+            </div>
+          )}
+
+          {loading && (
+            <div className="py-8 text-center">
+              <div className="inline-block w-8 h-8 border-2 border-fire-flame border-t-transparent rounded-full animate-spin mb-3" />
+              <p className="text-gray-400">AI 正在思考中...</p>
+            </div>
+          )}
+
+          {!loading && sparks.length > 0 && (
+            <>
+              <div className="space-y-3">
+                {sparks.map((spark, index) => (
+                  <RekindleSparkCard
+                    key={index}
+                    content={spark.content}
+                    onRetain={() => handleRetain(index)}
+                    onDiscard={() => handleDiscard(index)}
+                    retained={spark.retained}
+                    discarded={spark.discarded}
+                  />
+                ))}
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => { setSparks([]); handleRekindle() }}
+                  disabled={cooldownRemaining > 0 || atLimit}
+                  className="flex-1 py-2 border border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  重新取火
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="flex-1 py-2 bg-fire-flame text-white rounded"
+                >
+                  保存火种
+                </button>
+              </div>
+            </>
+          )}
+
+          {!loading && sparks.length === 0 && !error && (
+            <div className="text-center py-4">
+              <p className="text-gray-500">暂无火种</p>
+            </div>
+          )}
+
+          {atLimit && (
+            <p className="text-orange-400 text-sm text-center mt-2">已达取火上限</p>
+          )}
+        </section>
+
+        {rekindleRecords.length > 0 && (
           <section className="mt-8">
             <h3 className="text-sm text-gray-500 mb-3">历史取火记录</h3>
             {rekindleRecords.map(record => (

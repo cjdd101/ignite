@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { motion } from 'framer-motion'
 import { openPlatformSearch } from '@/lib/platforms'
 
 interface PlatformJumpPanelProps {
@@ -27,7 +27,7 @@ export function PlatformJumpPanel({ searchPhrase, onClose }: PlatformJumpPanelPr
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
         className="bg-bg-primary rounded-t-3xl w-full max-w-lg p-5 border-t border-white/5"
       >
         <div className="flex justify-between items-center mb-4">

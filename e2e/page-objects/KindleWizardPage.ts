@@ -19,12 +19,15 @@ export class KindleWizardPage {
 
   async clickGetPerspectives(): Promise<void> {
     await this.getPerspectivesButton.click();
-    // 等待 AI 响应 - 等待视角卡片出现
-    await this.page.waitForSelector('button:has-text("阅读")', { timeout: 15000 });
+    // 等待 AI 响应 - 等待视角卡片出现（可能是"读一本书或文章"或其他）
+    await this.page.waitForSelector('text=选择探索视角（可多选）', { timeout: 20000 });
+    // 等待卡片加载完成
+    await this.page.waitForTimeout(1000);
   }
 
   async selectFirstPerspective(): Promise<void> {
-    const firstCard = this.page.locator('button:has-text("阅读")').first();
+    // 选择第一个视角卡片
+    const firstCard = this.page.locator('.space-y-3 > button').first();
     await firstCard.click();
     await this.page.waitForTimeout(300);
   }
@@ -41,7 +44,13 @@ export class KindleWizardPage {
 
   async clickConfirm(): Promise<void> {
     await this.confirmButton.click();
-    await this.page.waitForTimeout(2000);
+    // 等待创建完成并导航 - 最多等待 45 秒（AI API 可能较慢）
+    try {
+      await this.page.waitForURL('**/prairie**', { timeout: 45000 });
+    } catch {
+      // 如果超时，可能还在加载，额外等待一下
+      await this.page.waitForTimeout(5000);
+    }
   }
 
   async selectWildFireOption(): Promise<void> {

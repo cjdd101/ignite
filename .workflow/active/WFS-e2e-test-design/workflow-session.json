@@ -1,0 +1,8 @@
+{
+  "sessionId": "WFS-e2e-test-design",
+  "topic": "根据《点燃》设计文档，生成覆盖所有功能的端到端测试用例",
+  "executionMode": "auto",
+  "selectedRoles": ["test-strategist"],
+  "createdAt": "2026-04-28T12:00:00Z",
+  "status": "completed"
+}

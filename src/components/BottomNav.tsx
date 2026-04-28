@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { motion } from 'motion/react'
+import { motion } from 'framer-motion'
 
 interface NavItem {
   to: string
