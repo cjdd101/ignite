@@ -5,7 +5,7 @@ import { BottomNav } from '@/components/BottomNav'
 import { createGitHubIssue } from '@/lib/api'
 
 const GITHUB_REPO = 'cjdd101/ignite'
-const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN
+const GITHUB_TOKEN = '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'
 
 export function SettingsPage() {
   const [sparkCount, setSparkCount] = useState(0)
