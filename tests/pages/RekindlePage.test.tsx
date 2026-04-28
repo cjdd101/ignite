@@ -12,7 +12,7 @@ vi.mock('@/lib/api')
 
 const mockUseFlameStore = useFlameStore as unknown as ReturnType<typeof vi.fn>
 const mockUseSparkStore = useSparkStore as unknown as ReturnType<typeof vi.fn>
-const mockApi = api as unknown as ReturnType<typeof vi.fn>
+const mockApi = api as any
 
 const renderWithRouter = (ui: React.ReactElement) => {
   return render(ui, { wrapper: BrowserRouter })

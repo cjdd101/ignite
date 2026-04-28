@@ -102,7 +102,7 @@ describe('useFlameStore', () => {
     it('creates a flame with default values', async () => {
       const { result } = renderHook(() => useFlameStore())
 
-      let flame: ReturnType<typeof result.current.addFlame> extends Promise<infer T> ? T : never
+      let flame!: ReturnType<typeof result.current.addFlame> extends Promise<infer T> ? T : never
       await act(async () => {
         flame = await result.current.addFlame({
           title: 'Test Flame',

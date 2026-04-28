@@ -25,6 +25,7 @@ export interface RekindleRequest {
 
 export interface RekindleResponse {
   newQuestions: string[]
+  sparks: Array<{ content: string; type: string }>
 }
 
 export interface OrganizeRequest {

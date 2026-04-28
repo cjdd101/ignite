@@ -31,7 +31,7 @@ describe('usePrairieStore', () => {
     it('creates prairie with active status', async () => {
       const { result } = renderHook(() => usePrairieStore())
 
-      let prairie: ReturnType<typeof result.current.addPrairie> extends Promise<infer T> ? T : never
+      let prairie!: ReturnType<typeof result.current.addPrairie> extends Promise<infer T> ? T : never
       await act(async () => {
         prairie = await result.current.addPrairie('咖啡探索', '探索咖啡的世界')
       })

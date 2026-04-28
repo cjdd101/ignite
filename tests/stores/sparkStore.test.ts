@@ -49,7 +49,7 @@ describe('useSparkStore', () => {
     it('adds a spark with correct properties', async () => {
       const { result } = renderHook(() => useSparkStore())
 
-      let spark: ReturnType<typeof result.current.addSpark> extends Promise<infer T> ? T : never
+      let spark!: ReturnType<typeof result.current.addSpark> extends Promise<infer T> ? T : never
       await act(async () => {
         spark = await result.current.addSpark('测试内容', 'user')
       })
@@ -63,7 +63,7 @@ describe('useSparkStore', () => {
     it('persists the spark to database', async () => {
       const { result } = renderHook(() => useSparkStore())
 
-      let spark: ReturnType<typeof result.current.addSpark> extends Promise<infer T> ? T : never
+      let spark!: ReturnType<typeof result.current.addSpark> extends Promise<infer T> ? T : never
       await act(async () => {
         spark = await result.current.addSpark('持久化测试', 'ai_seed')
       })

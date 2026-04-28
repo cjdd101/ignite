@@ -73,14 +73,14 @@ export function OrganizePage() {
         }
       }
     } else if (currentSuggestion.action === 'create' && currentSuggestion.newPrairieName) {
-      const newPrairie = await db.prairies.add({
+      const newPrairieId = await db.prairies.add({
         id: crypto.randomUUID(),
         name: currentSuggestion.newPrairieName,
         status: 'active',
         createdAt: Date.now(),
       })
       for (const flameId of flameIds) {
-        await db.flames.update(flameId, { prairieId: newPrairie.id })
+        await db.flames.update(flameId, { prairieId: newPrairieId })
       }
     }
 

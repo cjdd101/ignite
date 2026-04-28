@@ -5,7 +5,7 @@ import { BottomNav } from '@/components/BottomNav'
 import { createGitHubIssue } from '@/lib/api'
 
 const GITHUB_REPO = 'cjdd101/ignite'
-const GITHUB_TOKEN = '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'
+const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN as string
 
 export function SettingsPage() {
   const [sparkCount, setSparkCount] = useState(0)
@@ -334,7 +334,7 @@ export function SettingsPage() {
               </p>
               <div className="mt-4 pt-4 border-t border-white/5">
                 <p className="text-xs text-text-muted">
-                  设计哲学：野草式生长 · 火种为货币 · 建议而非指派
+                  设计哲学：野草式生长，野火式蔓延
                 </p>
               </div>
             </div>

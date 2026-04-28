@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { db, generateId } from '@/lib/db'
-import { useFlameStore } from '@/stores/flameStore'
 import { usePrairieStore } from '@/stores/prairieStore'
 import { api } from '@/lib/api'
 import { PerspectiveCard } from '@/components/PerspectiveCard'
@@ -23,7 +22,6 @@ interface KindleWizardProps {
 
 export function KindleWizard({ sparkId }: KindleWizardProps) {
   const navigate = useNavigate()
-  const { addFlame } = useFlameStore()
   const { prairies, fetchPrairies } = usePrairieStore()
 
   const [spark, setSpark] = useState<Spark | null>(null)
@@ -130,26 +128,26 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
     const igniteBatchId = generateId()
     const createdFlames: { id: string; title: string; searchPhrase: string }[] = []
 
-    let targetPrairieId = selectedPrairieId
+    let targetPrairieId: string | null = selectedPrairieId
     if (newPrairieName && !selectedPrairieId) {
-      const newPrairie = await db.prairies.add({
+      const newPrairieId = await db.prairies.add({
         id: generateId(),
         name: newPrairieName,
         status: 'active',
         createdAt: Date.now(),
       })
-      targetPrairieId = newPrairie.id
+      targetPrairieId = newPrairieId
     }
 
     for (const index of selectedIndices) {
-      const flame = await db.flames.add({
+      const flameId = await db.flames.add({
         id: generateId(),
         title: flameTitles[index],
         description: actionInputs[index]?.firstStep || perspectives[index]?.firstStep,
         recommendationReason: perspectives[index]?.description || '',
         searchPhrase: actionInputs[index]?.searchPhrase || perspectives[index]?.searchPhrase || '',
         status: 'burning',
-        prairieId: targetPrairieId || undefined,
+        prairieId: targetPrairieId,
         sourceSparkId: sparkId || undefined,
         igniteBatchId,
         userRecord: undefined,
@@ -159,7 +157,7 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
         rekindleCount: 0,
       })
       createdFlames.push({
-        id: flame.id,
+        id: flameId,
         title: flameTitles[index],
         searchPhrase: actionInputs[index]?.searchPhrase || perspectives[index]?.searchPhrase || ''
       })

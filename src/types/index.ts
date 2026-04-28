@@ -12,19 +12,19 @@ export interface Spark {
 export interface Flame {
   id: string
   title: string
-  description?: string
-  recommendationReason?: string
-  searchPhrase?: string
+  description?: string | null
+  recommendationReason?: string | null
+  searchPhrase?: string | null
   status: 'burning' | 'burned'
-  prairieId?: string
-  sourceSparkId?: string
-  igniteBatchId?: string
-  userRecord?: string
-  completedAt?: number
+  prairieId: string | null
+  sourceSparkId?: string | null
+  igniteBatchId?: string | null
+  userRecord?: string | null
+  completedAt?: number | null
   createdAt: number
   isDeleted: boolean
   rekindleCount: number
-  lastRekindleTime?: number
+  lastRekindleTime?: number | null
 }
 
 export interface RekindleRecord {
