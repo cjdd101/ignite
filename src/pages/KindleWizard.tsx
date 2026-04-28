@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { db, generateId } from '@/lib/db'
 import { useFlameStore } from '@/stores/flameStore'
 import { usePrairieStore } from '@/stores/prairieStore'
@@ -18,14 +18,17 @@ interface Perspective {
 
 interface KindleWizardProps {
   sparkId: string
+  prairieId?: string
 }
 
-export function KindleWizard({ sparkId }: KindleWizardProps) {
+export function KindleWizard({ sparkId, prairieId: initialPrairieId }: KindleWizardProps) {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { addFlame } = useFlameStore()
   const { prairies, fetchPrairies } = usePrairieStore()
 
   const [spark, setSpark] = useState<Spark | null>(null)
+  const [sparkContent, setSparkContent] = useState<string>('')
   const [step, setStep] = useState<Step>('perspective')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +42,7 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
   const [flameTitles, setFlameTitles] = useState<string[]>([])
 
   // Step 3: Confirm
-  const [selectedPrairieId, setSelectedPrairieId] = useState<string | null>(null)
+  const [selectedPrairieId, setSelectedPrairieId] = useState<string | null>(initialPrairieId || null)
   const [newPrairieName, setNewPrairieName] = useState<string | null>(null)
   const [showPlatformPanel, setShowPlatformPanel] = useState(false)
   const [createdSearchPhrases, setCreatedSearchPhrases] = useState<string[]>([])
@@ -50,20 +53,28 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
   }, [sparkId])
 
   const loadSpark = async () => {
-    if (!sparkId) return
-    const s = await db.sparks.get(sparkId)
-    setSpark(s || null)
+    if (sparkId) {
+      const s = await db.sparks.get(sparkId)
+      setSpark(s || null)
+    } else {
+      // Check for content in query params (manual create from Explore)
+      const content = searchParams.get('content')
+      if (content) {
+        setSparkContent(decodeURIComponent(content))
+      }
+    }
   }
 
   const handleLoadPerspectives = async () => {
-    if (!spark) return
+    const content = spark?.content || sparkContent
+    if (!content) return
     setLoading(true)
     setError(null)
 
     try {
       const existingPrairieNames = prairies.map(p => p.name)
       const response = await api.ignite({
-        sparkContent: spark.content,
+        sparkContent: content,
         existingPrairies: existingPrairieNames,
       })
 
@@ -76,8 +87,8 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
     } catch (err) {
       setError('AI 暂时不可用')
       const fallback: Perspective[] = [
-        { type: '阅读', description: '通过书籍深入了解', firstStep: '搜索相关书籍', searchPhrase: spark.content },
-        { type: '观看', description: '通过视频直观学习', firstStep: '搜索相关视频', searchPhrase: spark.content },
+        { type: '阅读', description: '通过书籍深入了解', firstStep: '搜索相关书籍', searchPhrase: content },
+        { type: '观看', description: '通过视频直观学习', firstStep: '搜索相关视频', searchPhrase: content },
       ]
       setPerspectives(fallback)
       setActionInputs(fallback.map(() => ({ firstStep: '', searchPhrase: '' })))
@@ -125,7 +136,7 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
   }
 
   const handleCreateFlames = async () => {
-    if (!spark) return
+    if (!spark && !sparkContent) return
 
     setLoading(true)
     const igniteBatchId = generateId()
@@ -176,13 +187,16 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
     navigate('/prairie')
   }
 
-  if (!spark) {
+  // If no spark and no sparkContent, show manual creation prompt
+  if (!spark && !sparkContent) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">火种不存在</p>
+        <p className="text-gray-500">请从火盆或探索页选择要点燃的内容</p>
       </div>
     )
   }
+
+  const displayContent = spark?.content || sparkContent
 
   const stepLabels: Record<Step, string> = {
     perspective: '第1步: 选择探索视角',
@@ -201,7 +215,7 @@ export function KindleWizard({ sparkId }: KindleWizardProps) {
         <section className="mb-6">
           <h2 className="text-sm text-gray-400 mb-2">火种内容</h2>
           <div className="bg-bg-card rounded-lg p-4">
-            <p className="text-white">{spark.content}</p>
+            <p className="text-white">{displayContent}</p>
           </div>
         </section>
 
