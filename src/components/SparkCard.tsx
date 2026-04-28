@@ -9,7 +9,7 @@ export function SparkCard({ spark }: SparkCardProps) {
   const navigate = useNavigate()
 
   const handleClick = () => {
-    navigate(`/prairie/${spark.id}/kindle`)
+    navigate(`/hearth/kindle/${spark.id}`)
   }
 
   return (
