@@ -261,7 +261,7 @@ export function SettingsPage() {
                       value={feedbackTitle}
                       onChange={(e) => setFeedbackTitle(e.target.value)}
                       placeholder="简要描述问题"
-                      className="w-full px-4 py-3 rounded-lg bg-primary border border-white/10 text-primary placeholder-muted focus:outline-none focus:border-fire-flame/50"
+                      className="w-full px-4 py-3 rounded-lg bg-bg-secondary border border-white/10 text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-fire-flame/50"
                       maxLength={100}
                     />
                   </div>
@@ -274,7 +274,7 @@ export function SettingsPage() {
                       onChange={(e) => setFeedbackDesc(e.target.value)}
                       placeholder="详细描述你遇到的问题..."
                       rows={4}
-                      className="w-full px-4 py-3 rounded-lg bg-primary border border-white/10 text-primary placeholder-muted focus:outline-none focus:border-fire-flame/50 resize-none"
+                      className="w-full px-4 py-3 rounded-lg bg-bg-secondary border border-white/10 text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-fire-flame/50 resize-none"
                     />
                   </div>
                   {submitResult && (
