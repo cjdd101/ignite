@@ -29,10 +29,10 @@ export function generateId(): string {
 }
 
 export async function getOrCreateDeviceUuid(): Promise<string> {
-  const existing = await db.deviceInfo.get('device')
+  const existing = await db.deviceInfo.get('device' as any)
   if (existing) return existing.deviceUuid
 
   const uuid = crypto.randomUUID()
-  await db.deviceInfo.put({ id: 'device', deviceUuid: uuid })
+  await db.deviceInfo.put({ id: 'device' as any, deviceUuid: uuid })
   return uuid
 }

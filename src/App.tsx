@@ -6,12 +6,9 @@ import { SettingsPage } from '@/pages/SettingsPage'
 import { KindleWizard } from '@/pages/KindleWizard'
 import { RekindlePage } from '@/pages/RekindlePage'
 import { OrganizePage } from '@/pages/OrganizePage'
+import { FlameDetailPage } from '@/pages/FlameDetailPage'
+import { CompleteBurningPage } from '@/pages/CompleteBurningPage'
 import { PageTransition } from '@/components/PageTransition'
-
-function RekindleWrapper() {
-  const { flameId } = useParams<{ flameId: string }>()
-  return <RekindlePage flameId={flameId || ''} />
-}
 
 function KindleWrapper() {
   const { flameId } = useParams<{ flameId: string }>()
@@ -27,8 +24,10 @@ function App() {
           <Route path="/hearth" element={<HearthPage />} />
           <Route path="/prairie" element={<PrairiePage />} />
           <Route path="/prairie/flame/create" element={<KindleWizard sparkId="" />} />
+          <Route path="/prairie/flame/:id" element={<FlameDetailPage />} />
+          <Route path="/prairie/flame/:id/complete" element={<CompleteBurningPage />} />
           <Route path="/prairie/:flameId/kindle" element={<KindleWrapper />} />
-          <Route path="/prairie/:flameId/rekindle" element={<RekindleWrapper />} />
+          <Route path="/prairie/:flameId/rekindle" element={<RekindlePage />} />
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/organize" element={<OrganizePage />} />
           <Route path="/settings" element={<SettingsPage />} />

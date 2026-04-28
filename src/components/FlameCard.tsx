@@ -15,7 +15,7 @@ export function FlameCard({ flame, onDelete }: FlameCardProps) {
   const isBurning = flame.status === 'burning'
 
   const handleClick = () => {
-    navigate(`/prairie/${flame.id}/rekindle`)
+    navigate(`/prairie/flame/${flame.id}`)
   }
 
   const handleDelete = async (e: React.MouseEvent) => {

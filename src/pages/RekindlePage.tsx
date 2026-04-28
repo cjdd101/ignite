@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { useNavigate } from 'react-router-dom'
-import { useFlameStore } from '@/stores/flameStore'
+import { useParams, useNavigate } from 'react-router-dom'
+import { db, generateId } from '@/lib/db'
 import { useSparkStore } from '@/stores/sparkStore'
 import { api } from '@/lib/api'
 import { RekindleSparkCard } from '@/components/RekindleSparkCard'
+import { BottomNav } from '@/components/BottomNav'
+import type { Flame, RekindleRecord } from '@/types'
 
-type Step = 'reflect' | 'review'
+type Step = 'review' | 'save'
 
 interface RekindledSpark {
   content: string
-  type: string
   retained: boolean
   discarded: boolean
 }
@@ -19,12 +20,12 @@ const REKINDLE_COOLDOWN = 5000
 const REKINDLE_LIMIT = 10
 
 export function RekindlePage() {
+  const { flameId } = useParams<{ flameId: string }>()
   const navigate = useNavigate()
-  const { flames } = useFlameStore()
   const { addSpark } = useSparkStore()
 
-  const [step, setStep] = useState<Step>('reflect')
-  const [reflection, setReflection] = useState('')
+  const [flame, setFlame] = useState<Flame | null>(null)
+  const [step, setStep] = useState<Step>('review')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
@@ -32,11 +33,20 @@ export function RekindlePage() {
   const [atLimit, setAtLimit] = useState(false)
 
   useEffect(() => {
-    if (flames.length >= REKINDLE_LIMIT) {
-      setAtLimit(true)
-      setCooldownRemaining(5)
+    if (flameId) {
+      db.flames.get(flameId).then(f => {
+        setFlame(f || null)
+        if (f) {
+          setAtLimit(f.rekindleCount >= REKINDLE_LIMIT)
+          setCooldownRemaining(
+            f.lastRekindleTime && Date.now() - f.lastRekindleTime < REKINDLE_COOLDOWN
+              ? Math.ceil((REKINDLE_COOLDOWN - (Date.now() - f.lastRekindleTime)) / 1000)
+              : 0
+          )
+        }
+      })
     }
-  }, [flames.length])
+  }, [flameId])
 
   useEffect(() => {
     if (cooldownRemaining > 0) {
@@ -48,28 +58,28 @@ export function RekindlePage() {
   }, [cooldownRemaining])
 
   const handleRekindle = async () => {
-    if (!reflection.trim() || loading || atLimit) return
-
-    if (cooldownRemaining > 0) return
+    if (!flame || loading || atLimit || cooldownRemaining > 0) return
 
     setLoading(true)
     setError(null)
 
     try {
       const response = await api.rekindle({
-        taskTitle: '反思与重新点燃',
-        taskDescription: '',
-        userRecord: reflection.trim(),
-        sourcePrairie: ''
+        taskTitle: flame.title,
+        taskDescription: flame.description || '',
+        userRecord: flame.userRecord || '',
+        sourcePrairie: flame.prairieId || '',
       })
-      setSparks(response.sparks.map((s: { content: string; type: string }) => ({
-        ...s,
+
+      const newSparks = (response.newQuestions || []).map((q: string) => ({
+        content: q,
         retained: false,
         discarded: false,
-      })))
-      setStep('review')
+      }))
+      setSparks(newSparks)
+      setStep('save')
     } catch (err) {
-      setError('重新点燃失败')
+      setError('重新点燃失败，请稍后重试')
     } finally {
       setLoading(false)
     }
@@ -88,21 +98,39 @@ export function RekindlePage() {
   }
 
   const handleBack = () => {
-    setStep('reflect')
+    setStep('review')
     setSparks([])
   }
 
   const handleSave = async () => {
-    const sparksToSave = sparks.filter(s => !s.discarded)
+    if (!flameId || !flame) return
+
+    const sparksToSave = sparks.filter(s => s.retained && !s.discarded)
+    const retainedIds: string[] = []
 
     for (const spark of sparksToSave) {
-      await addSpark(spark.content, 'ai_rekindle')
+      const newSpark = await addSpark(spark.content, 'ai_rekindle')
+      retainedIds.push(newSpark.id)
     }
 
-    navigate('/hearth')
+    const record: RekindleRecord = {
+      id: generateId(),
+      flameId: flameId,
+      sparksResult: sparks.map(s => s.content),
+      retainedSparkIds: retainedIds,
+      createdAt: Date.now(),
+    }
+    await db.rekindleRecords.add(record)
+
+    await db.flames.update(flameId, {
+      rekindleCount: flame.rekindleCount + 1,
+      lastRekindleTime: Date.now(),
+    })
+
+    navigate('/prairie')
   }
 
-  const canRekindle = reflection.trim().length > 0 && cooldownRemaining === 0 && !loading && !atLimit
+  const canRekindle = cooldownRemaining === 0 && !loading && !atLimit
 
   return (
     <div className="page">
@@ -123,30 +151,32 @@ export function RekindlePage() {
             <h1 className="text-2xl font-display font-bold text-text-primary">重新点燃</h1>
           </div>
           <p className="text-sm text-text-muted">
-            {step === 'reflect' ? '写下你的反思' : '选择要保留的火种'}
+            {step === 'review' ? '从燃烧中获得新的灵感' : '选择要保留的火种'}
           </p>
         </motion.header>
 
         <main className="px-4 max-w-lg mx-auto pb-8">
+          {flame && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card card-flame p-4 mb-4"
+            >
+              <h2 className="font-medium text-text-primary">{flame.title}</h2>
+              <p className="text-sm text-text-muted mt-1">
+                已取火 {flame.rekindleCount} / {REKINDLE_LIMIT} 次
+              </p>
+            </motion.div>
+          )}
+
           <AnimatePresence mode="wait">
-            {step === 'reflect' && (
+            {step === 'review' && (
               <motion.section
-                key="reflect"
+                key="review"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <div className="mb-6">
-                  <label className="block text-xs text-text-muted uppercase tracking-wider mb-2">写下你的反思</label>
-                  <textarea
-                    value={reflection}
-                    onChange={(e) => setReflection(e.target.value)}
-                    placeholder="这次探索给你带来了什么感悟..."
-                    rows={6}
-                    className="input resize-none"
-                  />
-                </div>
-
                 {cooldownRemaining > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -169,39 +199,47 @@ export function RekindlePage() {
                   </motion.div>
                 )}
 
-                <motion.button
-                  whileHover={{ scale: canRekindle ? 1.02 : 1 }}
-                  whileTap={{ scale: canRekindle ? 0.98 : 1 }}
-                  onClick={handleRekindle}
-                  disabled={!canRekindle}
-                  className={`w-full py-4 rounded-xl font-medium transition-all ${
-                    canRekindle
-                      ? 'bg-gradient-to-r from-fire-flame to-fire-wildfire text-white shadow-lg'
-                      : 'bg-bg-elevated text-text-muted cursor-not-allowed'
-                  }`}
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                      </svg>
-                      重新点燃中...
-                    </span>
-                  ) : '重新点燃'}
-                </motion.button>
+                <div className="text-center py-8">
+                  <p className="text-text-secondary mb-4">
+                    点击按钮，AI 将根据你的探索生成 3 个新的灵感火种
+                  </p>
+                  <motion.button
+                    whileHover={{ scale: canRekindle ? 1.02 : 1 }}
+                    whileTap={{ scale: canRekindle ? 0.98 : 1 }}
+                    onClick={handleRekindle}
+                    disabled={!canRekindle}
+                    className={`w-full py-4 rounded-xl font-medium transition-all ${
+                      canRekindle
+                        ? 'bg-gradient-to-r from-fire-flame to-fire-wildfire text-white shadow-lg'
+                        : 'bg-bg-elevated text-text-muted cursor-not-allowed'
+                    }`}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        重新点燃中...
+                      </span>
+                    ) : '重新点燃'}
+                  </motion.button>
+                  {atLimit && (
+                    <p className="text-orange-400 text-sm mt-2">已达取火上限</p>
+                  )}
+                </div>
               </motion.section>
             )}
 
-            {step === 'review' && (
+            {step === 'save' && (
               <motion.section
-                key="review"
+                key="save"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
               >
                 <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">
-                  AI 重新点燃的火种
+                  选择保留的火种
                 </h2>
 
                 <div className="space-y-3 mb-6">
@@ -224,7 +262,7 @@ export function RekindlePage() {
                     onClick={handleBack}
                     className="flex-1 py-3 border border-white/10 rounded-xl text-text-secondary hover:bg-white/5 transition-colors"
                   >
-                    上一步
+                    重新取火
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -240,6 +278,8 @@ export function RekindlePage() {
           </AnimatePresence>
         </main>
       </div>
+
+      <BottomNav />
     </div>
   )
 }
