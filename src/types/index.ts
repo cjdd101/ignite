@@ -2,9 +2,9 @@ export interface Spark {
   id: string
   content: string
   sourceType: 'user' | 'ai_rekindle' | 'ai_seed' | 'ai_explore'
-  sourceFlameId?: string
-  sourcePrairieId?: string
-  sourceSparkId?: string
+  sourceFlameId?: string | null
+  sourcePrairieId?: string | null
+  sourceSparkId?: string | null
   createdAt: number
   isDeleted: boolean
 }
@@ -38,9 +38,9 @@ export interface RekindleRecord {
 export interface Prairie {
   id: string
   name: string
-  description?: string
+  description?: string | null
   status: 'active' | 'archived'
-  archivedAt?: number
+  archivedAt?: number | null
   createdAt: number
 }
 

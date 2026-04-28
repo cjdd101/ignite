@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { db } from '@/lib/db'
@@ -41,7 +41,7 @@ describe('SettingsPage', () => {
         id: 'flame-1',
         title: 'Test flame',
         description: null,
-        status: 'active',
+        status: 'burning',
         prairieId: null,
         sourceSparkId: null,
         igniteBatchId: null,

@@ -47,7 +47,7 @@ describe('PrairiePage', () => {
         id: 'flame-1',
         title: 'Wild Flame Title',
         description: 'A wild flame',
-        status: 'active',
+        status: 'burning',
         prairieId: null,
         sourceSparkId: null,
         igniteBatchId: null,
