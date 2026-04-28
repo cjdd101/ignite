@@ -2,12 +2,23 @@ import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { db } from '@/lib/db'
 import { BottomNav } from '@/components/BottomNav'
+import { createGitHubIssue } from '@/lib/api'
+
+const GITHUB_REPO = 'cjdd101/ignite'
+const GITHUB_TOKEN = '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'
 
 export function SettingsPage() {
   const [sparkCount, setSparkCount] = useState(0)
   const [flameCount, setFlameCount] = useState(0)
   const [prairieCount, setPrairieCount] = useState(0)
   const [isClearing, setIsClearing] = useState(false)
+
+  // 问题反馈表单状态
+  const [feedbackTitle, setFeedbackTitle] = useState('')
+  const [feedbackDesc, setFeedbackDesc] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false)
 
   useEffect(() => {
     loadStats()
@@ -20,6 +31,40 @@ export function SettingsPage() {
     setSparkCount(sparks)
     setFlameCount(flames)
     setPrairieCount(prairies)
+  }
+
+  const handleSubmitFeedback = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!feedbackTitle.trim() || !feedbackDesc.trim()) {
+      setSubmitResult({ success: false, message: '请填写标题和描述' })
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitResult(null)
+
+    try {
+      const timestamp = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+      const result = await createGitHubIssue(GITHUB_REPO, GITHUB_TOKEN, {
+        title: `[用户反馈] ${feedbackTitle}`,
+        body: `## 问题描述\n${feedbackDesc}\n\n---\n*提交时间: ${timestamp}*\n*来源: 点燃 App 设置页反馈表单*`,
+        labels: ['bug', 'user-feedback'],
+      })
+      setSubmitResult({
+        success: true,
+        message: `问题已提交！Issue #${result.number}`,
+      })
+      setFeedbackTitle('')
+      setFeedbackDesc('')
+      setShowFeedbackForm(false)
+    } catch (err) {
+      setSubmitResult({
+        success: false,
+        message: `提交失败: ${err instanceof Error ? err.message : '未知错误'}`,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleExport = async () => {
@@ -165,6 +210,102 @@ export function SettingsPage() {
                 </span>
               </motion.button>
             </div>
+          </motion.section>
+
+          {/* 问题反馈 */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="mb-6"
+          >
+            <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4 px-2">
+              🐛 问题反馈
+            </h2>
+
+            {!showFeedbackForm ? (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowFeedbackForm(true)}
+                className="w-full p-4 rounded-xl bg-bg-card border border-fire-flame/20 flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-fire-flame/10 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-fire-flame" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-text-primary">提交问题</p>
+                    <p className="text-xs text-text-muted">发现 Bug？告诉我们</p>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-fire-flame/60 group-hover:text-fire-flame transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+              </motion.button>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="card p-5"
+              >
+                <form onSubmit={handleSubmitFeedback} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
+                      问题标题
+                    </label>
+                    <input
+                      type="text"
+                      value={feedbackTitle}
+                      onChange={(e) => setFeedbackTitle(e.target.value)}
+                      placeholder="简要描述问题"
+                      className="w-full px-4 py-3 rounded-lg bg-bg-primary border border-white/10 text-text-primary placeholder-text-muted focus:outline-none focus:border-fire-flame/50"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
+                      问题描述
+                    </label>
+                    <textarea
+                      value={feedbackDesc}
+                      onChange={(e) => setFeedbackDesc(e.target.value)}
+                      placeholder="详细描述你遇到的问题..."
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-lg bg-bg-primary border border-white/10 text-text-primary placeholder-text-muted focus:outline-none focus:border-fire-flame/50 resize-none"
+                    />
+                  </div>
+                  {submitResult && (
+                    <div className={`p-3 rounded-lg text-sm ${submitResult.success ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                      {submitResult.message}
+                    </div>
+                  )}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowFeedbackForm(false)
+                        setSubmitResult(null)
+                        setFeedbackTitle('')
+                        setFeedbackDesc('')
+                      }}
+                      className="flex-1 py-3 rounded-lg bg-white/5 text-text-secondary hover:bg-white/10 transition-colors"
+                    >
+                      取消
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="flex-1 py-3 rounded-lg bg-fire-flame text-white font-medium hover:bg-fire-ember transition-colors disabled:opacity-50"
+                    >
+                      {isSubmitting ? '提交中...' : '提交'}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
           </motion.section>
 
           {/* 关于 */}
