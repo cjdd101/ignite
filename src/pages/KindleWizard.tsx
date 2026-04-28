@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { db, generateId } from '@/lib/db'
-import { useFlameStore } from '@/stores/flameStore'
 import { usePrairieStore } from '@/stores/prairieStore'
 import { api } from '@/lib/api'
 import { PlatformJumpPanel } from '@/components/PlatformJumpPanel'
@@ -24,7 +23,6 @@ interface KindleWizardProps {
 export function KindleWizard({ sparkId, prairieId: initialPrairieId }: KindleWizardProps) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { addFlame } = useFlameStore()
   const { prairies, fetchPrairies } = usePrairieStore()
 
   const [spark, setSpark] = useState<Spark | null>(null)
@@ -144,17 +142,18 @@ export function KindleWizard({ sparkId, prairieId: initialPrairieId }: KindleWiz
 
     let targetPrairieId = selectedPrairieId
     if (newPrairieName && !selectedPrairieId) {
-      const newPrairie = await db.prairies.add({
-        id: generateId(),
+      const newId = generateId()
+      await db.prairies.add({
+        id: newId,
         name: newPrairieName,
         status: 'active',
         createdAt: Date.now(),
       })
-      targetPrairieId = newPrairie.id
+      targetPrairieId = newId
     }
 
     for (const index of selectedIndices) {
-      const flame = await db.flames.add({
+      await db.flames.add({
         id: generateId(),
         title: flameTitles[index],
         description: actionInputs[index]?.firstStep || perspectives[index]?.firstStep,

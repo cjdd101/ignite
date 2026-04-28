@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { db, generateId } from '@/lib/db'
 import { api } from '@/lib/api'
 import { RekindleSparkCard } from '@/components/RekindleSparkCard'

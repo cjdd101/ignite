@@ -31,7 +31,7 @@ export function FlameCard({ flame, onDelete }: FlameCardProps) {
     >
       <div className="flex justify-between items-start">
         <h3 className="font-medium text-fire-flame">{flame.title}</h3>
-        {flame.status === 'active' && (
+        {flame.status === 'burning' && (
           <span className="text-xs bg-fire-flame/20 text-fire-flame px-2 py-0.5 rounded">
             燃烧中
           </span>

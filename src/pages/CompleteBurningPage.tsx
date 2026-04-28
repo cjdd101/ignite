@@ -12,7 +12,7 @@ export function CompleteBurningPage() {
 
   useEffect(() => {
     if (id) {
-      db.flames.get(id).then(setFlame)
+      db.flames.get(id).then(f => setFlame(f || null))
     }
   }, [id])
 
