@@ -48,7 +48,7 @@ export function KindleWizard({ sparkId, prairieId: initialPrairieId }: KindleWiz
   useEffect(() => {
     loadSpark()
     fetchPrairies()
-  }, [sparkId])
+  }, [sparkId, searchParams])
 
   const loadSpark = async () => {
     if (sparkId) {
